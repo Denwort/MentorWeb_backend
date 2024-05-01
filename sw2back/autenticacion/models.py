@@ -59,6 +59,49 @@ class Administrador(Persona):
             "nombres": self.nombres,
             "celular": self.celular
         }
+        
+class Profesor(Persona):
+    foto = models.TextField()
+    def __str__(self):
+        return "Profesor={foto=" + self.foto + "}"
+
+class Carrera(models.Model):
+    nombre = models.CharField(max_length=255)
+
+class Nivel(models.Model):
+    numero = models.IntegerField()
+
+class Curso(models.Model):
+    nombre = models.IntegerField()
+    carrera = models.ForeignKey(Carrera, on_delete=models.CASCADE, blank=False, related_name='cursos')
+    nivel = models.ForeignKey(Nivel, on_delete=models.CASCADE, blank=False, related_name='cursos')
+    def getJSON(self):
+        return {
+            "id": self.id,
+            "nombre": self.nombre
+        }
+
+class Periodo(models.Model):
+    codigo = models.IntegerField()
+
+class Seccion(models.Model):
+    codigo = models.IntegerField()
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE, blank=False, related_name='secciones')
+    periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE, blank=False, related_name='secciones')
+    
+class Asesoria(models.Model):
+    fecha_inicio = models.DateTimeField()
+    fecha_fin = models.DateTimeField()
+    enlace = models.TextField()
+    ambiente = models.TextField()
+    profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE, blank=False, related_name='asesorias')
+    seccion = models.ForeignKey(Seccion, on_delete=models.CASCADE, blank=False, related_name='asesorias')
+
+class Reserva(models.Model):
+    codigo = models.IntegerField()
+    estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE, blank=False, related_name='reservas')
+    asesoria = models.ForeignKey(Asesoria, on_delete=models.CASCADE, blank=False, related_name='reservas')
+    
 
 '''
 class Context():
@@ -87,40 +130,3 @@ class RegistroPersonas(SingletonModel):
         lista_serializable = [persona.getJSON() for persona in self.registro]
         return json.dumps(lista_serializable, ensure_ascii=False)
 '''
-        
-class Profesor(Persona):
-    foto = models.TextField()
-    def __str__(self):
-        return "Profesor={foto=" + self.foto + "}"
-
-class Carrera(models.Model):
-    nombre = models.CharField(max_length=255)
-
-class Nivel(models.Model):
-    numero = models.IntegerField()
-
-class Curso(models.Model):
-    nombre = models.IntegerField()
-    carrera = models.ForeignKey(Carrera, on_delete=models.CASCADE, blank=False, related_name='cursos')
-    nivel = models.ForeignKey(Nivel, on_delete=models.CASCADE, blank=False, related_name='cursos')
-
-class Periodo(models.Model):
-    codigo = models.IntegerField()
-
-class Seccion(models.Model):
-    codigo = models.CharField(max_length=255)
-    curso = models.ForeignKey(Curso, on_delete=models.CASCADE, blank=False, related_name='secciones')
-    periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE, blank=False, related_name='secciones')
-    
-class Asesoria(models.Model):
-    fecha_inicio = models.DateField()
-    fecha_fin = models.DateField()
-    enlace = models.TextField()
-    profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE, blank=False, related_name='asesorias')
-    seccion = models.ForeignKey(Seccion, on_delete=models.CASCADE, blank=False, related_name='asesorias')
-
-class Reservas(models.Model):
-    codigo = models.IntegerField()
-    estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE, blank=False, related_name='reservas')
-    asesoria = models.ForeignKey(Asesoria, on_delete=models.CASCADE, blank=False, related_name='reservas')
-    
