@@ -11,10 +11,10 @@ from autenticacion.models import *
 def register(request):
     data = request.body.decode('utf-8')
     data_json = json.loads(data)
-    username = data_json['username']
-    password = data_json['password']
-    names = data_json['names']
-    email = data_json['email']
+    username = data_json['usuario']
+    password = data_json['contrasenha']
+    names = data_json['nombres']
+    email = data_json['correo']
 
     cuenta = Cuenta.objects.filter(usuario=username).exists()
     if cuenta:
@@ -36,8 +36,8 @@ def register(request):
 def login(request):
     data = request.body.decode('utf-8')
     data_json = json.loads(data)
-    username = data_json['username']
-    password = data_json['password']
+    username = data_json['usuario']
+    password = data_json['contrasenha']
     cuenta = Cuenta.objects.filter(usuario=username, contrasenha=password).exists()
     if cuenta:
         cuenta = Cuenta.objects.filter(usuario=username, contrasenha=password).first()
@@ -45,22 +45,22 @@ def login(request):
         if hasattr(persona, 'estudiante'):
             estudiante = Estudiante.objects.filter(cuenta=cuenta).first()
             return JsonResponse({
-                "type":estudiante.getTipo(),
-                "message": "Login exitoso",
+                "tipo":estudiante.getTipo(),
                 "cuenta": cuenta.getJSON(),
-                "estudiante": estudiante.getJSON()
+                "estudiante": estudiante.getJSON(),
+                "mensaje": "Login exitoso"
             })
         if hasattr(persona, 'administrador'):
             administrador = Administrador.objects.filter(cuenta=cuenta).first()
             return JsonResponse({
-                "type":estudiante.getTipo(),
-                "message": "Login exitoso",
+                "tipo":administrador.getTipo(),
                 "cuenta": cuenta.getJSON(),
-                "administrador": administrador.getJSON()
+                "administrador": administrador.getJSON(),
+                "message": "Login exitoso"
             })
     return JsonResponse({
-        "type": 0,
-        "message": "Cuenta no existente"
+        "tipo": 0,
+        "mensaje": "Cuenta no existente"
     })
 
 @require_http_methods(["GET"])
@@ -116,6 +116,10 @@ def profesores(request):
         }
         profesores_encontrados.append(profesor_info)
     return JsonResponse(profesores_encontrados, safe=False)
+
+@require_http_methods(["GET"])
+def profesor(request):
+    return JsonResponse({})
 
 def test(request):
     if request.method == 'POST':

@@ -10,4 +10,4 @@ Modelos y Clases en Django:
 https://docs.djangoproject.com/en/5.0/topics/db/models/
 
 Testear APIs:
-curl -X POST http://127.0.0.1:8000/autenticacion/test/ -H 'Content-Type: application/json' -d @pruebita.json
+curl -X POST http://127.0.0.1:8000/autenticacion/login/ -H 'Content-Type: application/json' -d @pruebita.json

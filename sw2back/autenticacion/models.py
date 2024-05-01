@@ -29,6 +29,7 @@ class Cuenta(models.Model):
         return "Cuenta={usuario=" + self.usuario + "; contrasenha= " + self.contrasenha + "}"
     def getJSON(self):
         return {
+            "id": self.id,
             "usuario": self.usuario,
             "contrasenha": self.contrasenha
         }
@@ -41,6 +42,7 @@ class Estudiante(Persona):
         return "Estudiante={nombres=" + self.nombres + "; correo=" + self.correo + "; cuenta=" + str(self.cuenta)
     def getJSON(self):
         return {
+            "id": self.id,
             "nombres": self.nombres,
             "correo": self.correo
         }
@@ -53,10 +55,12 @@ class Administrador(Persona):
         return "Administrador={nombres=" + self.nombres + "; celular=" + self.celular + "; cuenta=" + str(self.cuenta)
     def getJSON(self):
         return {
+            "id": self.id,
             "nombres": self.nombres,
             "celular": self.celular
         }
 
+'''
 class Context():
     strategy :Persona
     def setStrategy(self, persona:Persona):
@@ -82,7 +86,8 @@ class RegistroPersonas(SingletonModel):
     def getJSON(self):
         lista_serializable = [persona.getJSON() for persona in self.registro]
         return json.dumps(lista_serializable, ensure_ascii=False)
-    
+'''
+        
 class Profesor(Persona):
     foto = models.TextField()
     def __str__(self):
