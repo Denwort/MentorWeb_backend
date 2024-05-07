@@ -3,7 +3,7 @@ import json
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.core.serializers import serialize
 from django.views.decorators.http import require_http_methods
-from autenticacion.models import *
+from app.models import *
 from datetime import datetime
 
 # Create your views here.
