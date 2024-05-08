@@ -64,7 +64,7 @@ def login(request):
             "mensaje": "Login exitoso"
         })
 
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
 def asesorias_estudiante(request):
     data_json = json.loads(request.body.decode('utf-8'))
     estudiante_id = data_json['estudiante_id']
@@ -75,14 +75,14 @@ def asesorias_estudiante(request):
     
     return JsonResponse(estudiante.getReservas(), safe=False)
 
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
 def profesores(request):
     data_json = json.loads(request.body.decode('utf-8'))
     keyword = data_json['keyword']
     profesores = Profesor.objects.filter(nombres__icontains=keyword)
     return JsonResponse([profesor.getJSONSimple() for profesor in profesores], safe=False)
 
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
 def profesor(request):
     data_json = json.loads(request.body.decode('utf-8'))
     profesor_id = data_json['profesor_id']
