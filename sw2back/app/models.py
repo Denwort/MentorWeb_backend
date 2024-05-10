@@ -41,7 +41,7 @@ class Estudiante(Persona):
         return 1
     def __str__(self):
         return "Estudiante={nombres=" + self.nombres + "; correo=" + self.correo + "; cuenta=" + str(self.cuenta)
-    def getJSON(self):
+    def getJSONSimple(self):
         return {
             "id": self.id,
             "nombres": self.nombres,
@@ -205,12 +205,12 @@ class Reserva(models.Model):
     codigo = models.IntegerField()
     estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE, blank=False, related_name='reservas')
     asesoria = models.ForeignKey(Asesoria, on_delete=models.CASCADE, blank=False, related_name='reservas')
-    def getJSON(self):
+    def getJSONSimple(self):
         return {
             "id": self.id,
             "codigo": self.codigo,
-            "estudiante": self.estudiante.getJSON(),
-            "asesoria": self.asesoria.getJSON(),
+            "estudiante": self.estudiante.getJSONSimple(),
+            "asesoria": self.asesoria.getJSONSimple(),
         }
     def getJSONAsesoria(self):
         return {
