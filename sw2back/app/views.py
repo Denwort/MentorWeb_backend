@@ -93,6 +93,31 @@ def profesor(request):
     
     return JsonResponse(profesor.getAsesorias(), safe=False)
 
+def generarCodigo():
+    timestamp = datetime.now().timestamp()
+    unique_code = int(timestamp)
+    return unique_code
+
+@require_http_methods(["POST"])
+def reservar(request):
+    data_json = json.loads(request.body.decode('utf-8'))
+    estudiante_id = data_json['estudiante_id']
+    asesoria_id = data_json['asesoria_id']
+
+    estudiante = Estudiante.objects.filter(id=estudiante_id).first()
+    if not estudiante:
+        return HttpResponseBadRequest("estudiante inexistente")
+    
+    asesoria = Asesoria.objects.filter(id=asesoria_id).first()
+    if not asesoria:
+        return HttpResponseBadRequest("reserva inexistente")
+
+    codigo = generarCodigo()
+    reserva = Reserva(codigo=codigo, estudiante=estudiante, asesoria=asesoria)
+    reserva.save()
+
+    return JsonResponse(reserva.getJSONSimple(), safe=False)
+
 def seeders(request):
     n1 = Nivel(numero=8)
     n1.save()
