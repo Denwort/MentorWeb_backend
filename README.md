@@ -11,7 +11,7 @@ Modelos y Clases en Django:
 https://docs.djangoproject.com/en/5.0/topics/db/models/
 
 Testear APIs:
-curl -X POST http://127.0.0.1:8000/asesorias_estudiante/ -H 'Content-Type: application/json' -d @pruebita.json
+curl -X POST http://127.0.0.1:8000/reservar/ -H 'Content-Type: application/json' -d @pruebita.txt
 
 APIS
 
@@ -20,6 +20,7 @@ APIS
 |http://127.0.0.1:8000/asesorias_estudiante/ |POST   |{"estudiante_id": "id del estudiante"}    |[aqui](#recibir-de-asesorias_estudiante) |
 |http://127.0.0.1:8000/profesores/           |POST   |{"keyword": "texto para buscar al profe"} |[aqui](#recibir-de-profesores) |
 |http://127.0.0.1:8000/profesor/             |POST   |{"profesor_id": "id del profesor"}        |[aqui](#recibir-de-profesor)   |
+|http://127.0.0.1:8000/reservar/             |POST   |{"estudiante_id": "id del estudiante", "asesoria_id": "id de la asesoria"}        |[aqui](#recibir-de-reservar)   |
 
 ### Ejemplos de lo que el front recibe del back
 
@@ -277,5 +278,26 @@ APIS
       }
     }
   ]
+}
+```
+
+#### Recibir de ```reservar/```
+
+```json
+{
+  "id": 11,
+  "codigo": 1715350463,
+  "estudiante": {
+    "id": 5,
+    "nombres": "David",
+    "correo": "david@gmail.com"
+  },
+  "asesoria": {
+    "id": 2,
+    "fecha_inicio": "2024-05-02T10:00:00Z",
+    "fecha_fin": "2024-05-02T11:00:00Z",
+    "enlace": "enlace2",
+    "ambiente": "O2"
+  }
 }
 ```
