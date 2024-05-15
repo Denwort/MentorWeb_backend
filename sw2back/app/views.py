@@ -1,122 +1,144 @@
-from django.shortcuts import render
 import json
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.core.serializers import serialize
 from django.views.decorators.http import require_http_methods
 from app.models import *
+from app.classes import *
 from datetime import datetime
 
-# Create your views here.
-@require_http_methods(["POST"])
-def register(request):
-    data = request.body.decode('utf-8')
-    data_json = json.loads(data)
-    username = data_json['usuario']
-    password = data_json['contrasenha']
-    names = data_json['nombres']
-    email = data_json['correo']
+class GestionCuentas:
 
-    cuenta = Cuenta.objects.filter(usuario=username).exists()
-    if cuenta:
-        return HttpResponseBadRequest("usuario ya existe")
-    else:
-        estudiante =  Estudiante(nombres=names, correo=email)
-        estudiante.save()
-        cuenta = Cuenta(usuario=username, contrasenha=password, persona=estudiante)
-        cuenta.save()
-        return JsonResponse({
-            "tipo": estudiante.getTipo(),
-            "mensaje": "Cuenta creada correctamente"
-        })
+    @require_http_methods(["POST"])
+    def register(request):
 
-@require_http_methods(["POST"])
-def login(request):
-    data = request.body.decode('utf-8')
-    data_json = json.loads(data)
-    username = data_json['usuario']
-    password = data_json['contrasenha']
-    cuenta = Cuenta.objects.filter(usuario=username).exists()
+        r = DecoratorUsuario(DecoratorContrasenha(DecoratorNombres(DecoratorCorreo(RequestExtractor(request)))))
+        [username, password, names, email] = r.extract()
 
-    if not cuenta:
-        return HttpResponseBadRequest("Cuenta inexistente")
-    
-    cuenta = Cuenta.objects.filter(usuario=username, contrasenha=password).exists()
+        cuenta = Cuenta.objects.filter(usuario=username).exists()
 
-    if not cuenta:
-        return HttpResponseBadRequest("Contraseña incorrecta")
+        if cuenta:
+            return HttpResponseBadRequest("usuario ya existe")
+        else:
+            estudiante = Estudiante(correo=email)
+            if estudiante:
+                return HttpResponseBadRequest("correo un uso")
+            
+            estudiante =  Estudiante(nombres=names, correo=email)
+            estudiante.save()
+            cuenta = Cuenta(usuario=username, contrasenha=password, persona=estudiante)
+            cuenta.save()
+
+            return JsonResponse(cuenta.getJSONPersona(), safe=False)
+
+    @require_http_methods(["POST"])
+    def login(request):
+
+        r = DecoratorUsuario(DecoratorContrasenha(RequestExtractor(request)))
+        [username, password] = r.extract()
+
+        cuenta = Cuenta.objects.filter(usuario=username).exists()
+        if not cuenta:
+            return HttpResponseBadRequest("Cuenta inexistente")
         
-    cuenta = Cuenta.objects.filter(usuario=username, contrasenha=password).first()
-    persona = cuenta.persona
-    if hasattr(persona, 'estudiante'):
-        estudiante = Estudiante.objects.filter(cuenta=cuenta).first()
-        return JsonResponse({
-            "tipo":estudiante.getTipo(),
-            "cuenta": cuenta.getJSON(),
-            "estudiante": estudiante.getJSON(),
-            "mensaje": "Login exitoso"
-        })
-    if hasattr(persona, 'administrador'):
-        administrador = Administrador.objects.filter(cuenta=cuenta).first()
-        return JsonResponse({
-            "tipo":administrador.getTipo(),
-            "cuenta": cuenta.getJSON(),
-            "administrador": administrador.getJSON(),
-            "mensaje": "Login exitoso"
-        })
+        cuenta = Cuenta.objects.filter(usuario=username, contrasenha=password).exists()
+        if not cuenta:
+            return HttpResponseBadRequest("Contraseña incorrecta")
+            
+        cuenta = Cuenta.objects.select_related('persona').get(usuario=username, contrasenha=password)
+        persona = cuenta.persona
+        print(persona.getPersona())
+        return JsonResponse(cuenta.getJSONPersona(), safe=False)
+        '''
+        if hasattr(persona, 'estudiante'):
+            estudiante = Estudiante.objects.filter(cuenta=cuenta).first()
+            return JsonResponse({
+                "tipo":estudiante.getTipo(),
+                "cuenta": cuenta.getJSON(),
+                "estudiante": estudiante.getJSON(),
+                "mensaje": "Login exitoso"
+            })
+        if hasattr(persona, 'administrador'):
+            administrador = Administrador.objects.filter(cuenta=cuenta).first()
+            return JsonResponse({
+                "tipo":administrador.getTipo(),
+                "cuenta": cuenta.getJSON(),
+                "administrador": administrador.getJSON(),
+                "mensaje": "Login exitoso"
+            })
+        '''
 
-@require_http_methods(["POST"])
-def asesorias_estudiante(request):
-    data_json = json.loads(request.body.decode('utf-8'))
-    estudiante_id = data_json['estudiante_id']
+class GestionPersonas:
 
-    estudiante = Estudiante.objects.filter(id=estudiante_id).first()
-    if not estudiante:
-        return HttpResponseBadRequest("estudiante inexistente")
+    @require_http_methods(["POST"])
+    def asesorias_estudiante(request):
+
+        r = DecoratorEstudianteId(RequestExtractor(request))
+        [estudiante_id] = r.extract()
+
+        b = Buscador(StrategyEstudiante())
+        estudiante = b.buscar(estudiante_id)
+        
+        if not estudiante:
+            return HttpResponseBadRequest("estudiante inexistente")
+        
+        return JsonResponse(estudiante.getReservas(), safe=False)
+
+    @require_http_methods(["POST"])
+    def profesores(request):
+
+        r = DecoratorKeyword(RequestExtractor(request))
+        [keyword] = r.extract()
+
+        b = Buscador(StrategyProfesores())
+        profesores = b.buscar(keyword)
+        
+        return JsonResponse([profesor.getJSONSimple() for profesor in profesores], safe=False)
+
+    @require_http_methods(["POST"])
+    def profesor(request):
+
+        r = DecoratorProfesorId(RequestExtractor(request))
+        [profesor_id] = r.extract()
+
+        b = Buscador(StrategyProfesor())
+        profesor = b.buscar(profesor_id)
+
+        if not profesor:
+            return HttpResponseBadRequest("profesor inexistente")
+        
+        return JsonResponse(profesor.getAsesorias(), safe=False)
+
+class GestionAsesorias:
     
-    return JsonResponse(estudiante.getReservas(), safe=False)
+    @staticmethod
+    def generarCodigo():
+        timestamp = datetime.now().timestamp()
+        unique_code = int(timestamp)
+        return unique_code
 
-@require_http_methods(["POST"])
-def profesores(request):
-    data_json = json.loads(request.body.decode('utf-8'))
-    keyword = data_json['keyword']
-    profesores = Profesor.objects.filter(nombres__icontains=keyword)
-    return JsonResponse([profesor.getJSONSimple() for profesor in profesores], safe=False)
+    @require_http_methods(["POST"])
+    def reservar(request):
 
-@require_http_methods(["POST"])
-def profesor(request):
-    data_json = json.loads(request.body.decode('utf-8'))
-    profesor_id = data_json['profesor_id']
+        r = DecoratorEstudianteId(DecoratorAsesoriaId(RequestExtractor(request)))
+        [estudiante_id, asesoria_id] = r.extract()
 
-    profesor = Profesor.objects.filter(id=profesor_id).first()
-    if not profesor:
-        return HttpResponseBadRequest("profesor inexistente")
-    
-    return JsonResponse(profesor.getAsesorias(), safe=False)
+        b = Buscador(StrategyEstudiante())
+        estudiante = b.buscar(estudiante_id)
 
-def generarCodigo():
-    timestamp = datetime.now().timestamp()
-    unique_code = int(timestamp)
-    return unique_code
+        if not estudiante:
+            return HttpResponseBadRequest("estudiante inexistente")
+        
+        b = Buscador(StrategyAsesoria())
+        asesoria = b.buscar(asesoria_id)
 
-@require_http_methods(["POST"])
-def reservar(request):
-    data_json = json.loads(request.body.decode('utf-8'))
-    estudiante_id = data_json['estudiante_id']
-    asesoria_id = data_json['asesoria_id']
+        if not asesoria:
+            return HttpResponseBadRequest("reserva inexistente")
 
-    estudiante = Estudiante.objects.filter(id=estudiante_id).first()
-    if not estudiante:
-        return HttpResponseBadRequest("estudiante inexistente")
-    
-    asesoria = Asesoria.objects.filter(id=asesoria_id).first()
-    if not asesoria:
-        return HttpResponseBadRequest("reserva inexistente")
+        codigo = GestionAsesorias.generarCodigo()
+        reserva = Reserva(codigo=codigo, estudiante=estudiante, asesoria=asesoria)
+        reserva.save()
 
-    codigo = generarCodigo()
-    reserva = Reserva(codigo=codigo, estudiante=estudiante, asesoria=asesoria)
-    reserva.save()
-
-    return JsonResponse(reserva.getJSONSimple(), safe=False)
+        return JsonResponse(reserva.getJSONSimple(), safe=False)
 
 def seeders(request):
     n1 = Nivel(numero=8)
@@ -233,7 +255,7 @@ def test(request):
             cuenta = Cuenta(usuario=username, contrasenha=password)
             cuenta.save()
             estudiante =  Estudiante(nombres=names, correo=email, cuenta=cuenta)
-            registro = RegistroPersonas.get_instance()
+            registro = 1
             registro.agregar(estudiante)
             print("----")
             registro.imprimir()

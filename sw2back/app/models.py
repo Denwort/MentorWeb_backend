@@ -1,6 +1,9 @@
+from __future__ import annotations
 from abc import abstractmethod
 from django.db import models
+from app.classes import Singleton
 import json
+
 
 # Create your models here.
 
@@ -8,12 +11,51 @@ class Persona(models.Model):
     class Meta:
         abstract: True
     nombres = models.CharField(max_length=255)
+    # Faltaria cmabiar para utilizar Factory Method
+    '''
+    from abc import ABC, abstractmethod
+
+    class PersonaManager(ABC):
+        @abstractmethod
+        def get_persona(self):
+            pass
+
+    class EstudianteManager(PersonaManager):
+        def get_persona(self):
+            return Estudiante.objects.get(pk=self.pk)
+
+    class ProfesorManager(PersonaManager):
+        def get_persona(self):
+            return Profesor.objects.get(pk=self.pk)
+
+    class Persona(models.Model):
+        # Campos comunes a todas las personas
+
+        objects = PersonaManager()
+
+    class Estudiante(Persona):
+        # Campos específicos de los estudiantes
+
+    class Profesor(Persona):
+        # Campos específicos de los profesores
+    '''
+    @property
+    def tipo(self):
+        if hasattr(self, 'estudiante'):
+            return 'Estudiante'
+        elif hasattr(self, 'administrador'):
+            return 'Administrador'
+        else:
+            return 'Persona'
+    def getPersona(self):
+        if hasattr(self, 'estudiante'):
+            return Estudiante.objects.get(pk=self.pk)
+        if hasattr(self, 'administrador'):
+            return Administrador.objects.get(pk=self.pk)
     def __str__(self):
         pass
     @abstractmethod
-    def getTipo(self):
-        pass
-    def getJSON(self):
+    def getJSONSimple(self):
         pass
 
 class Cuenta(models.Model):
@@ -27,44 +69,52 @@ class Cuenta(models.Model):
     )
     def __str__(self):
         return "Cuenta={usuario=" + self.usuario + "; contrasenha= " + self.contrasenha + "}"
-    def getJSON(self):
+    def getJSONPersona(self):
         return {
             "id": self.id,
             "usuario": self.usuario,
             "contrasenha": self.contrasenha,
-            "persona": self.persona.getJSON()
+            "persona": self.persona.getPersona().getJSONSimple()
         }
 
 class Estudiante(Persona):
     correo = models.CharField(max_length=255)
     def getTipo(self):
-        return 1
+        return "Estudiante"
     def __str__(self):
         return "Estudiante={nombres=" + self.nombres + "; correo=" + self.correo + "; cuenta=" + str(self.cuenta)
     def getJSONSimple(self):
         return {
             "id": self.id,
+            "tipo": self.getTipo(),
             "nombres": self.nombres,
             "correo": self.correo
         }
     def getReservas(self):
-        return [reserva.getJSONAsesoria() for reserva in self.reservas.all()]
+        s = Singleton()
+        periodo_actual = s.getPeriodoActual()
+        fecha_actual = s.getFechaActual()
+        return [reserva.getJSONAsesoria() for reserva in self.reservas.all() if 
+                (reserva.getPeriodo() == periodo_actual and reserva.getFecha() >= fecha_actual)]
 
 class Administrador(Persona):
     celular = models.CharField(max_length=255)
     def getTipo(self):
-        return 3
+        return "Administrador"
     def __str__(self):
         return "Administrador={nombres=" + self.nombres + "; celular=" + self.celular + "; cuenta=" + str(self.cuenta)
-    def getJSON(self):
+    def getJSONSimple(self):
         return {
             "id": self.id,
+            "tipo": self.getTipo(),
             "nombres": self.nombres,
             "celular": self.celular
         }
         
 class Profesor(Persona):
     foto = models.TextField()
+    def getTipo(self):
+        return "Profesor"
     def __str__(self):
         return "Profesor={foto=" + self.foto + "}"
     def getJSON(self):
@@ -81,11 +131,13 @@ class Profesor(Persona):
             "foto": self.foto,
         }
     def getAsesorias(self):
+        s = Singleton()
+        periodo_actual = s.getPeriodoActual()
         return {
             "id": self.id,
             "nombres": self.nombres,
             "foto": self.foto,
-            "secciones": [seccion.getJSONArriba() for seccion in self.secciones.all()]
+            "secciones": [seccion.getJSONArriba() for seccion in self.secciones.all() if seccion.getPeriodo() == periodo_actual]
         }
     
 class Carrera(models.Model):
@@ -126,19 +178,58 @@ class Curso(models.Model):
         }
 
 class Periodo(models.Model):
-    codigo = models.IntegerField()
+    codigo = models.IntegerField(unique=True)
     def getJSONSimple(self):
         return {
             "id": self.id,
             "codigo": self.codigo
         }
+    def getPeriodo(self):
+        return self.codigo
+   
+class Seccion(models.Model):
+    codigo = models.IntegerField()
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE, blank=False, related_name='secciones')
+    periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE, blank=False, related_name='secciones')
+    profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE, blank=False, related_name='secciones')
+    
+    def getJSON(self):
+        return {
+            "id": self.id,
+            "codigo": self.codigo,
+            "curso": self.curso.getJSON(),
+            "periodo": self.periodo.getJSON(),
+            "profesor": self.profesor.getJSON(),
+        }
+    def getJSONDerecha(self):
+        return {
+            "id": self.id,
+            "codigo": self.codigo,
+            "curso": self.curso.getJSONDerecha(),
+            "periodo": self.periodo.getJSONSimple(),
+            "profesor": self.profesor.getJSONSimple(),
+        }
+    def getJSONArriba(self):
+        s = Singleton()
+        fecha_actual = s.getFechaActual()
+        return {
+            "id": self.id,
+            "codigo": self.codigo,
+            "curso": self.curso.getJSONDerecha(),
+            "periodo": self.periodo.getJSONSimple(),
+            "asesorias": [asesoria.getJSONSimple() for asesoria in self.asesorias.all() if 
+                (asesoria.seccion == self and asesoria.getFecha() >= fecha_actual)]
+        }
+    def getPeriodo(self):
+        return self.periodo.getPeriodo()
 
+ 
 class Asesoria(models.Model):
     fecha_inicio = models.DateTimeField()
     fecha_fin = models.DateTimeField()
     enlace = models.TextField()
     ambiente = models.CharField(max_length=255)
-
+    seccion = models.ForeignKey(Seccion, on_delete=models.CASCADE, blank=False, related_name='asesorias')
     estudiantes = models.ManyToManyField(Estudiante, through='Reserva')
     def getJSON(self):
         return {
@@ -169,38 +260,12 @@ class Asesoria(models.Model):
         }
     def getEstudiantes(self):
         return [estudiante.getJSON() for estudiante in self.estudiantes.all()]
-
-class Seccion(models.Model):
-    codigo = models.IntegerField()
-    curso = models.ForeignKey(Curso, on_delete=models.CASCADE, blank=False, related_name='secciones')
-    periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE, blank=False, related_name='secciones')
-    profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE, blank=False, related_name='secciones')
-    asesoria = models.OneToOneField(Asesoria, on_delete=models.CASCADE, blank=False, related_name='seccion')
-    def getJSON(self):
-        return {
-            "id": self.id,
-            "codigo": self.codigo,
-            "curso": self.curso.getJSON(),
-            "periodo": self.periodo.getJSON(),
-            "profesor": self.profesor.getJSON(),
-        }
-    def getJSONDerecha(self):
-        return {
-            "id": self.id,
-            "codigo": self.codigo,
-            "curso": self.curso.getJSONDerecha(),
-            "periodo": self.periodo.getJSONSimple(),
-            "profesor": self.profesor.getJSONSimple(),
-        }
-    def getJSONArriba(self):
-        return {
-            "id": self.id,
-            "codigo": self.codigo,
-            "curso": self.curso.getJSONDerecha(),
-            "periodo": self.periodo.getJSONSimple(),
-            "asesoria": self.asesoria.getJSONSimple(),
-        }
+    def getPeriodo(self):
+        return self.seccion.getPeriodo()
+    def getFecha(self):
+        return self.fecha_fin
     
+
 class Reserva(models.Model):
     codigo = models.IntegerField()
     estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE, blank=False, related_name='reservas')
@@ -218,8 +283,10 @@ class Reserva(models.Model):
             "codigo": self.codigo,
             "asesoria": self.asesoria.getJSONDerecha()
         }
-    
-
+    def getPeriodo(self):
+        return self.asesoria.getPeriodo()
+    def getFecha(self):
+        return self.asesoria.getFecha()
 '''
 class Context():
     strategy :Persona
