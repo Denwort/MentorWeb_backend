@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import abstractmethod
 from django.db import models
-from app.classes import Singleton
+from app.patrones import Singleton
 import json
 
 
@@ -157,6 +157,7 @@ class Nivel(models.Model):
         }
 
 class Curso(models.Model):
+    codigo = models.IntegerField()
     nombre = models.CharField(max_length=255)
     carrera = models.ForeignKey(Carrera, on_delete=models.CASCADE, blank=False, related_name='cursos')
     nivel = models.ForeignKey(Nivel, on_delete=models.CASCADE, blank=False, related_name='cursos')
@@ -165,6 +166,7 @@ class Curso(models.Model):
     def getJSON(self):
         return {
             "id": self.id,
+            "codigo": self.codigo,
             "nombre": self.nombre,
             "carrera": self.carrera,
             "nivel": self.nivel
@@ -172,13 +174,14 @@ class Curso(models.Model):
     def getJSONDerecha(self):
         return {
             "id": self.id,
+            "codigo": self.codigo,
             "nombre": self.nombre,
             "carrera": self.carrera.getJSONSimple(),
             "nivel": self.nivel.getJSONSimple()
         }
 
 class Periodo(models.Model):
-    codigo = models.IntegerField(unique=True)
+    codigo = models.CharField(max_length=255, unique=True)
     def getJSONSimple(self):
         return {
             "id": self.id,
@@ -192,7 +195,8 @@ class Seccion(models.Model):
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE, blank=False, related_name='secciones')
     periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE, blank=False, related_name='secciones')
     profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE, blank=False, related_name='secciones')
-    
+    def __str__(self):
+        return "Seccion={codigo=" + str(self.codigo) + "}"
     def getJSON(self):
         return {
             "id": self.id,

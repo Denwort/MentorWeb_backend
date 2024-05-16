@@ -3,7 +3,8 @@ from django.http import HttpResponseBadRequest, JsonResponse
 from django.core.serializers import serialize
 from django.views.decorators.http import require_http_methods
 from app.models import *
-from app.classes import *
+from app.patrones import *
+from app.seeders import *
 from datetime import datetime
 
 class GestionCuentas:
@@ -139,6 +140,33 @@ class GestionAsesorias:
         reserva.save()
 
         return JsonResponse(reserva.getJSONSimple(), safe=False)
+
+class GestionarAdministrador:
+    @require_http_methods(["POST"])
+    def cargar(request):
+        
+        periodo = request.POST.get('periodo')
+        fecha_inicio_str = request.POST.get('fecha_inicio')
+        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
+
+        excel_secciones = request.FILES['excel_secciones']
+        excel_asesorias = request.FILES['excel_asesorias']
+        df = GestionarInformacion.leer(excel_secciones, excel_asesorias)
+
+        
+        GestionarInformacion.subir(df, periodo, fecha_inicio)
+
+        df_json = df.to_dict(orient='records')
+        return JsonResponse({'data': df_json}, json_dumps_params={'ensure_ascii': False})
+    @require_http_methods(["POST"])
+    def xd(request):
+        data = json.loads(request.body.decode('utf-8'))
+        df = pd.DataFrame(data['data'])
+        periodo = pd.DataFrame(data['periodo'])
+        fecha_inicio_str = pd.DataFrame(data['fecha_inicio'])
+        fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d')
+        GestionarInformacion.subir(df, periodo, fecha_inicio)
+        return JsonResponse({'mensaje': 'Base de datos actualizada correctamente'})
 
 def seeders(request):
     n1 = Nivel(numero=8)
