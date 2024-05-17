@@ -12,21 +12,39 @@ https://docs.djangoproject.com/en/5.0/topics/db/models/
 
 Testear APIs:
 curl -X POST http://127.0.0.1:8000/registrar/ -H 'Content-Type: application/json' -d @pruebita.json
+
 {"usuario": "pruebita", "contrasenha": "pruebita", "nombres": "Pruebita", "correo": "pruebita@gmail.com"}
+
+
 curl -X POST http://127.0.0.1:8000/login/ -H 'Content-Type: application/json' -d @pruebita.json
+
 {"usuario": "pruebita", "contrasenha": "pruebita"}
+
+
 curl -X POST http://127.0.0.1:8000/asesorias_estudiante/ -H 'Content-Type: application/json' -d @pruebita.json
+
 {"estudiante_id": "143"}
+
+
 curl -X POST http://127.0.0.1:8000/profesores/ -H 'Content-Type: application/json' -d @pruebita.json
+
 {"keyword": "nin"}
+
+
 curl -X POST http://127.0.0.1:8000/profesor/ -H 'Content-Type: application/json' -d @pruebita.json
+
 {"profesor_id": "1"}
+
+
 curl -X POST http://127.0.0.1:8000/reservar/ -H 'Content-Type: application/json' -d @pruebita.json
+
 {"estudiante_id": "143", "asesoria_id": "1"}
-curl -X POST http://127.0.0.1:8000/cargar/ -H 'Content-Type: application/json' -d @pruebita.json
 
 
 curl -X POST -F "excel_secciones=@2024-1_Horarios_Cursos_Sección.xlsx" -F "excel_asesorias=@Atención_alumnos_2024-1.xlsx" -d '{"periodo": "2024-1", "fecha_inicio": "2024-04-01"} http://127.0.0.1:8000/cargar/
+
+
+
 
 APIS
 
