@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
-from app.models import *
+from sw2back.app.models import *
 
 class GestionarStrings:
     @staticmethod

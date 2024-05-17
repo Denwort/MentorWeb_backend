@@ -1,5 +1,5 @@
 from __future__ import annotations
-from app.models import *
+from sw2back.app.models import Profesor
 from abc import ABC, abstractmethod
 from typing import List
 from datetime import datetime
