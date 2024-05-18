@@ -506,9 +506,12 @@ class GestionarInformacion:
             c, _ = Curso.objects.get_or_create(codigo=curso_codigo, nombre=curso_nombre, nivel=n, carrera=carrera)
 
             profesor_nombre = fila['PROFESOR TITULAR']
-            #profesor_foto = GestionarImagenes.obtener_url_segunda_imagen_google(profesor_nombre)
-            p, _ = Profesor.objects.get_or_create(nombres=profesor_nombre)
-
+            p, creado = Profesor.objects.get_or_create(nombres=profesor_nombre)
+            if creado:
+                profesor_foto = GestionarImagenes.obtener_url_segunda_imagen_google(profesor_nombre)
+                p.foto = profesor_foto
+                p.save()
+                
             seccion_codigo = int(fila['Seccion'])
             s, _ = Seccion.objects.get_or_create(codigo=seccion_codigo, curso=c, periodo=periodo, profesor=p)
             print("Agregado: ", s)

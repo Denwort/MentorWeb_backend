@@ -21,7 +21,7 @@ class GestionCuentas:
         else:
             estudiante = Estudiante.objects.filter(correo=correo).exists()
             if estudiante:
-                return HttpResponseBadRequest("correo un uso")
+                return HttpResponseBadRequest("correo en uso")
             
             estudiante =  Estudiante(nombres=nombres, correo=correo)
             estudiante.save()
@@ -108,11 +108,15 @@ class GestionAsesorias:
         if not asesoria:
             return HttpResponseBadRequest("reserva inexistente")
 
-        codigo = GestionAsesorias.generarCodigo()
-        reserva = Reserva(codigo=codigo, estudiante=estudiante, asesoria=asesoria)
-        reserva.save()
-
-        return JsonResponse(reserva.getJSONSimple(), safe=False)
+        reserva, creado = Reserva.objects.get_or_create(estudiante=estudiante, asesoria=asesoria)
+        if creado:
+            codigo = GestionAsesorias.generarCodigo()
+            reserva.codigo=codigo
+            reserva.save()
+            return JsonResponse(reserva.getJSONSimple(), safe=False)
+        else:
+            return HttpResponseBadRequest("usted ya ha reservado esta asesoria")
+        
 
 class GestionarAdministrador:
     @require_http_methods(["POST"])
