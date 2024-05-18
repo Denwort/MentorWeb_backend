@@ -23,16 +23,17 @@ https://docs.djangoproject.com/en/5.0/topics/db/models/
 
 ## Usar APIs
 
-| Acción                                | Método | URL                                         | JSON a enviar                                                                                          | JSON a recibir |
-|---------------------------------------|--------|---------------------------------------------|----------------------------------------------------------------------------------------------------------|----------------|
-| **Registrar Usuario**                 | POST   | http://127.0.0.1:8000/registrar/            | `{ "usuario": "test", "contrasenha": "test", "nombres": "Test", "correo": "test@gmail.com" }`            | [Ver JSON](#json-a-recibir-de-registrar) |
-| **Iniciar Sesión**                    | POST   | http://127.0.0.1:8000/login/                | `{ "usuario": "test", "contrasenha": "test" }`                                                          | [Ver JSON](#json-a-recibir-de-login) |
-| **Obtener Asesorías de Estudiante**   | POST   | http://127.0.0.1:8000/asesorias_estudiante/ | `{ "estudiante_id": "143" }`                                                                             | [Ver JSON](#json-a-recibir-de-asesorias_estudiante) |
-| **Buscar Profesores**                 | POST   | http://127.0.0.1:8000/profesores/           | `{ "keyword": "nin" }`                                                                                   | [Ver JSON](#json-a-recibir-de-profesores) |
-| **Obtener Detalles de un Profesor**   | POST   | http://127.0.0.1:8000/profesor/             | `{ "profesor_id": "24" }`                                                                                 | [Ver JSON](#json-a-recibir-de-profesor) |
-| **Reservar Asesoría**                 | POST   | http://127.0.0.1:8000/reservar/             | `{ "estudiante_id": "144", "asesoria_id": "15" }`                                                         | [Ver JSON](#json-a-recibir-de-reservar) |
-| **Cargar Datos de Excel**             | POST   | http://127.0.0.1:8000/cargar/               | `-F "excel_secciones=@2024-1_Horarios_Cursos_Sección.xlsx" -F "excel_asesorias=@Atención_alumnos_2024-1.xlsx" -d '{"periodo": "2024-1", "fecha_inicio": "2024-04-01"}'` | [Ver JSON](#json-a-recibir-de-cargar) |
+| Acción                                | URL                                         | JSON a enviar                                                                                          | JSON a recibir |
+|---------------------------------------|---------------------------------------------|----------------------------------------------------------------------------------------------------------|----------------|
+| **Registrar Usuario**                 | http://127.0.0.1:8000/registrar/            | `{ "usuario": "test", "contrasenha": "test", "nombres": "Test", "correo": "test@gmail.com" }`            | [Ver JSON](#json-a-recibir-de-registrar) |
+| **Iniciar Sesión**                    | http://127.0.0.1:8000/login/                | `{ "usuario": "test", "contrasenha": "test" }`                                                          | [Ver JSON](#json-a-recibir-de-login) |
+| **Obtener Asesorías de Estudiante**   | http://127.0.0.1:8000/asesorias_estudiante/ | `{ "estudiante_id": "143" }`                                                                             | [Ver JSON](#json-a-recibir-de-asesorias_estudiante) |
+| **Buscar Profesores**                 | http://127.0.0.1:8000/profesores/           | `{ "keyword": "nin" }`                                                                                   | [Ver JSON](#json-a-recibir-de-profesores) |
+| **Obtener Detalles de un Profesor**   | http://127.0.0.1:8000/profesor/             | `{ "profesor_id": "24" }`                                                                                 | [Ver JSON](#json-a-recibir-de-profesor) |
+| **Reservar Asesoría**                 | http://127.0.0.1:8000/reservar/             | `{ "estudiante_id": "144", "asesoria_id": "15" }`                                                         | [Ver JSON](#json-a-recibir-de-reservar) |
+| **Cargar Datos de Excel**             | http://127.0.0.1:8000/cargar/               | `-F "excel_secciones=@2024-1_Horarios_Cursos_Sección.xlsx" -F "excel_asesorias=@Atención_alumnos_2024-1.xlsx" -d '{"periodo": "2024-1", "fecha_inicio": "2024-04-01"}'` | [Ver JSON](#json-a-recibir-de-cargar) |
 
+**Nota:** Todos los endpoints utilizan el método POST.
 
 ## Ejemplos de lo que el front recibe del back
 
