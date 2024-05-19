@@ -108,14 +108,14 @@ class GestionAsesorias:
         if not asesoria:
             return HttpResponseBadRequest("reserva inexistente")
 
-        reserva, creado = Reserva.objects.get_or_create(estudiante=estudiante, asesoria=asesoria)
+        creado = Reserva.objects.filter(estudiante=estudiante, asesoria=asesoria).exists()
         if creado:
+            return HttpResponseBadRequest("usted ya ha reservado esta asesoria")
+        else:
             codigo = GestionAsesorias.generarCodigo()
-            reserva.codigo=codigo
+            reserva = Reserva(codigo=codigo, estudiante=estudiante, asesoria=asesoria)
             reserva.save()
             return JsonResponse(reserva.getJSONSimple(), safe=False)
-        else:
-            return HttpResponseBadRequest("usted ya ha reservado esta asesoria")
         
 
 class GestionarAdministrador:
