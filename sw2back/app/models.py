@@ -61,7 +61,7 @@ class Estudiante(Persona):
     def getJSONSimple(self):
         return {
             "id": self.id,
-            "tipo": self.getTipo(),
+            "tipo": self.tipo,
             "nombres": self.nombres,
             "correo": self.correo
         }
@@ -81,7 +81,7 @@ class Administrador(Persona):
     def getJSONSimple(self):
         return {
             "id": self.id,
-            "tipo": self.getTipo(),
+            "tipo": self.tipo,
             "nombres": self.nombres,
             "celular": self.celular
         }
@@ -92,16 +92,10 @@ class Profesor(Persona):
         return "Profesor"
     def __str__(self):
         return "Profesor={foto=" + self.foto + "}"
-    def getJSON(self):
-        return {
-            "id": self.id,
-            "nombres": self.nombres,
-            "foto": self.foto,
-            "secciones": self.secciones.getJSON()
-        }
     def getJSONSimple(self):
         return {
             "id": self.id,
+            "tipo": self.tipo,
             "nombres": self.nombres,
             "foto": self.foto,
         }
@@ -136,16 +130,6 @@ class Curso(models.Model):
     nombre = models.CharField(max_length=255)
     carrera = models.ForeignKey(Carrera, on_delete=models.CASCADE, blank=False, related_name='cursos')
     nivel = models.ForeignKey(Nivel, on_delete=models.CASCADE, blank=False, related_name='cursos')
-    def getCarrera(self):
-        return self.carrera.getNombre()
-    def getJSON(self):
-        return {
-            "id": self.id,
-            "codigo": self.codigo,
-            "nombre": self.nombre,
-            "carrera": self.carrera,
-            "nivel": self.nivel
-        }
     def getJSONDerecha(self):
         return {
             "id": self.id,
@@ -172,14 +156,6 @@ class Seccion(models.Model):
     profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE, blank=False, related_name='secciones')
     def __str__(self):
         return "Seccion={codigo=" + str(self.codigo) + "}"
-    def getJSON(self):
-        return {
-            "id": self.id,
-            "codigo": self.codigo,
-            "curso": self.curso.getJSON(),
-            "periodo": self.periodo.getJSON(),
-            "profesor": self.profesor.getJSON(),
-        }
     def getJSONDerecha(self):
         return {
             "id": self.id,
@@ -210,16 +186,6 @@ class Asesoria(models.Model):
     ambiente = models.CharField(max_length=255)
     seccion = models.ForeignKey(Seccion, on_delete=models.CASCADE, blank=False, related_name='asesorias')
     estudiantes = models.ManyToManyField(Estudiante, through='Reserva')
-    def getJSON(self):
-        return {
-            "id": self.id,
-            "fecha_inicio": self.fecha_inicio,
-            "fecha_fin": self.fecha_fin,
-            "enlace": self.enlace,
-            "ambiente": self.ambiente,
-            "seccion": self.seccion.getJSON(),
-            "reservas": self.reservas.getJSON(),
-        }
     def getJSONSimple(self):
         return {
             "id": self.id,
@@ -237,8 +203,6 @@ class Asesoria(models.Model):
             "ambiente": self.ambiente,
             "seccion": self.seccion.getJSONDerecha(),
         }
-    def getEstudiantes(self):
-        return [estudiante.getJSON() for estudiante in self.estudiantes.all()]
     def getPeriodo(self):
         return self.seccion.getPeriodo()
     def getFecha(self):
