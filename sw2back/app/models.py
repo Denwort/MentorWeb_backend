@@ -489,9 +489,9 @@ class GestionarInformacion:
         return df_merged
     
     @staticmethod
-    def subir(df, periodo, fecha_comienzo):
+    def subir(df, nuevo_periodo, fecha_comienzo):
         
-        periodo, _ = Periodo.objects.get_or_create(codigo="2024 - 1")
+        periodo, _ = Periodo.objects.get_or_create(codigo=nuevo_periodo)
 
         for indice_fila, fila in df.iterrows():
             
