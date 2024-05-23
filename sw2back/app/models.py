@@ -66,7 +66,7 @@ class Estudiante(Persona):
             "correo": self.correo
         }
     def getReservas(self):
-        s = Singleton()
+        s = Singleton.load()
         periodo_actual = s.getPeriodoActual()
         fecha_actual = s.getFechaActual()
         return [reserva.getJSONAsesoria() for reserva in self.reservas.all() if 
@@ -100,7 +100,7 @@ class Profesor(Persona):
             "foto": self.foto,
         }
     def getAsesorias(self):
-        s = Singleton()
+        s = Singleton.load()
         periodo_actual = s.getPeriodoActual()
         return {
             "id": self.id,
@@ -165,7 +165,7 @@ class Seccion(models.Model):
             "profesor": self.profesor.getJSONSimple(),
         }
     def getJSONArriba(self):
-        s = Singleton()
+        s = Singleton.load()
         fecha_actual = s.getFechaActual()
         return {
             "id": self.id,
@@ -231,90 +231,21 @@ class Reserva(models.Model):
     def getFecha(self):
         return self.asesoria.getFecha()
 
-
-
-# Patrones.py
-
-# Patron Decorator
-
-class Extractor():
-    lista = []
-    def extract(self):
-        pass
-
-class RequestExtractor(Extractor):
-    def __init__(self, request):
-        self.lista.clear()
-        self.request = request
-    def extract(self):
-        data_json = json.loads(self.request.body.decode('utf-8'))
-        res = []
-        for l in self.lista:
-            res.append(data_json[l])            
-        return res
-
-class Decorator(Extractor):
-    _component: Extractor = None
-
-    def __init__(self, component: Extractor):
-        self._component = component
-
-    @property
-    def component(self) -> Extractor:
-        return self._component
-
-    def extract(self):
-        return self._component.extract()
-
-class DecoratorUsuario(Decorator):
-    def extract(self):
-        self.lista.append('usuario')
-        return self.component.extract()
-class DecoratorContrasenha(Decorator):
-    def extract(self):
-        self.lista.append('contrasenha')
-        return self.component.extract()
-class DecoratorNombres(Decorator):
-    def extract(self):
-        self.lista.append('nombres')
-        return self.component.extract()
-class DecoratorCorreo(Decorator):
-    def extract(self):
-        self.lista.append('correo')
-        return self.component.extract()
-
-class DecoratorEstudianteId(Decorator):
-    def extract(self):
-        self.lista.append('estudiante_id')
-        return self.component.extract()
-class DecoratorProfesorId(Decorator):
-    def extract(self):
-        self.lista.append('profesor_id')
-        return self.component.extract()
-class DecoratorKeyword(Decorator):
-    def extract(self):
-        self.lista.append('keyword')
-        return self.component.extract()
-class DecoratorAsesoriaId(Decorator):
-    def extract(self):
-        self.lista.append('asesoria_id')
-        return self.component.extract()
-
-    
-
-    
 # Singleton para marcar el Periodo actual y la fecha actual
-# Lo utiliza Estudiante y Profesor para obtener: reservas en el periodo actual y secciones en el periodo actual
-class SingletonMeta(type):
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            instance = super().__call__(*args, **kwargs)
-            cls._instances[cls] = instance
-        return cls._instances[cls]
+    
+class SingletonModel(models.Model):
+    class Meta:
+        abstract = True
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super(SingletonModel, self).save(*args, **kwargs)
+    @classmethod
+    def load(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
 
-class Singleton(metaclass=SingletonMeta):
-    periodoActual = "2024-1"
+class Singleton(SingletonModel):
+    periodoActual = models.CharField(max_length=255)
     def getPeriodoActual(self):
         return self.periodoActual
     def setPeriodoActual(self, nuevoPeriodo):
@@ -327,27 +258,9 @@ class Singleton(metaclass=SingletonMeta):
 
 # Controlar el periodo actual
 
+class GestionarInformacion:
 
-
-
-
-
-
-
-
-
-
-
-# Seeders
-
-
-class GestionarStrings:
-    @staticmethod
-    def es_substring(string, lista):
-        for elemento in lista:
-            if GestionarStrings.partes_pertenecen(string, elemento):
-                return elemento
-        return
+    # Metodos utiles
     @staticmethod
     def partes_pertenecen(substring, string_grande):
         string_grande = unidecode(string_grande).replace("/", ".").replace(" ", ".")
@@ -357,8 +270,12 @@ class GestionarStrings:
             if parte not in string_grande:
                 return False
         return True
-
-class GestionarFechas:
+    @staticmethod
+    def es_substring(string, lista):
+        for elemento in lista:
+            if GestionarInformacion.partes_pertenecen(string, elemento):
+                return elemento
+        return
     @staticmethod
     def obtener_fecha(fecha_comienzo, numero_de_semana, dia_de_semana):
         semana_comienzo = fecha_comienzo.strftime("%W")
@@ -387,8 +304,6 @@ class GestionarFechas:
     def poner_hora(fecha, nueva_hora):
         fecha_actualizada = fecha.replace(hour=nueva_hora, minute=0, second=0, microsecond=0)
         return fecha_actualizada
-
-class GestionarImagenes:
     @staticmethod
     def obtener_url_segunda_imagen_google(query):
         url = f"https://www.google.com/search?tbm=isch&q={query.replace(' ', '+')}"
@@ -402,13 +317,10 @@ class GestionarImagenes:
             return url_segunda_imagen
         else:
             return "No se encontraron suficientes imágenes"
-    
-class GestionarInformacion:
+
+    # Metodos llamados del controlador
     @staticmethod
     def leer(excel_secciones, excel_asesorias):
-
-        #excel_secciones = '/content/2024-1_Horarios_Cursos_Sección.xlsx'
-        #excel_asesorias = '/content/Atención_alumnos_2024-1.xlsx'
 
         df_secciones = pd.read_excel(excel_secciones)
         df_asesorias = pd.read_excel(excel_asesorias)
@@ -423,20 +335,20 @@ class GestionarInformacion:
 
         lineas = [linea.strip() for linea in lineas]
         for i in df_asesorias['Asignatura_AUX']:
-            concordancia = GestionarStrings.es_substring(i, lineas)
+            concordancia = GestionarInformacion.es_substring(i, lineas)
             if concordancia:
                 df_asesorias.loc[df_asesorias['Asignatura_AUX'] == i, 'Asignatura_AUX'] = concordancia
             else:
                 print("No encontrado: ", i)
         for i in df_secciones['NOMBRE CURSO_AUX']:
-            concordancia = GestionarStrings.es_substring(i, lineas)
+            concordancia = GestionarInformacion.es_substring(i, lineas)
             if concordancia:
                 df_secciones.loc[df_secciones['NOMBRE CURSO_AUX'] == i, 'NOMBRE CURSO_AUX'] = concordancia
             else:
                 print("No encontrado: ", i)
 
         for i in df_secciones['PROFESOR TITULAR_AUX']:
-            concordancia = GestionarStrings.es_substring(i, df_asesorias['Docente'])
+            concordancia = GestionarInformacion.es_substring(i, df_asesorias['Docente'])
             if concordancia:
                 df_secciones.loc[df_secciones['PROFESOR TITULAR_AUX'] == i, 'PROFESOR TITULAR_AUX'] = concordancia
             else:
@@ -472,7 +384,7 @@ class GestionarInformacion:
             profesor_nombre = fila['PROFESOR TITULAR']
             p, creado = Profesor.objects.get_or_create(nombres=profesor_nombre)
             if creado:
-                profesor_foto = GestionarImagenes.obtener_url_segunda_imagen_google(profesor_nombre)
+                profesor_foto = GestionarInformacion.obtener_url_segunda_imagen_google(profesor_nombre)
                 p.foto = profesor_foto
                 p.save()
                 
@@ -481,9 +393,9 @@ class GestionarInformacion:
             print("Agregado: ", s)
             if fila['Día'] != '':
                 for i in range(1,17):
-                    fecha = GestionarFechas.obtener_fecha(fecha_comienzo, i, fila['Día'])
-                    fecha_inicio = GestionarFechas.poner_hora(fecha, int(fila['Inicio']))
-                    fecha_fin = GestionarFechas.poner_hora(fecha, int(fila['Fin']))
+                    fecha = GestionarInformacion.obtener_fecha(fecha_comienzo, i, fila['Día'])
+                    fecha_inicio = GestionarInformacion.poner_hora(fecha, int(fila['Inicio']))
+                    fecha_fin = GestionarInformacion.poner_hora(fecha, int(fila['Fin']))
                     ambiente = fila['Ambientes']
                     enlace = fila['Enlace Virtual']
                     a, _ = Asesoria.objects.get_or_create(seccion=s, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, ambiente=ambiente, enlace=enlace)
