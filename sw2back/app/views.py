@@ -243,7 +243,7 @@ class GestionarInformacion:
         fecha_actualizada = fecha.replace(hour=nueva_hora, minute=0, second=0, microsecond=0)
         return fecha_actualizada
     @staticmethod
-    def obtener_url_segunda_imagen_google(query):
+    def obtener_url_imagen(query):
         url = f"https://www.google.com/search?tbm=isch&q={query.replace(' ', '+')}"
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"}
@@ -322,7 +322,7 @@ class GestionarInformacion:
             profesor_nombre = fila['PROFESOR TITULAR']
             p, creado = Profesor.objects.get_or_create(nombres=profesor_nombre)
             if creado:
-                profesor_foto = GestionarInformacion.obtener_url_segunda_imagen_google(profesor_nombre)
+                profesor_foto = GestionarInformacion.obtener_url_imagen(profesor_nombre)
                 p.foto = profesor_foto
                 p.save()
                 
