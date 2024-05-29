@@ -8,8 +8,17 @@ from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 
-# Create your models here.
+# Interfaces
+class PeriodoInterface:
+    @abstractmethod
+    def getPeriodo(self):
+        pass
+class FechaInterface:
+    @abstractmethod
+    def getFecha(self):
+        pass
 
+# Modelos
 class Persona(models.Model):
     class Meta:
         abstract: True
@@ -54,8 +63,6 @@ class Cuenta(models.Model):
 
 class Estudiante(Persona):
     correo = models.CharField(max_length=255)
-    def getTipo(self):
-        return "Estudiante"
     def __str__(self):
         return "Estudiante={nombres=" + self.nombres + "; correo=" + self.correo + "; cuenta=" + str(self.cuenta)
     def getJSONSimple(self):
@@ -74,8 +81,6 @@ class Estudiante(Persona):
 
 class Administrador(Persona):
     celular = models.CharField(max_length=255)
-    def getTipo(self):
-        return "Administrador"
     def __str__(self):
         return "Administrador={nombres=" + self.nombres + "; celular=" + self.celular + "; cuenta=" + str(self.cuenta)
     def getJSONSimple(self):
@@ -88,8 +93,6 @@ class Administrador(Persona):
         
 class Profesor(Persona):
     foto = models.TextField()
-    def getTipo(self):
-        return "Profesor"
     def __str__(self):
         return "Profesor={foto=" + self.foto + "}"
     def getJSONSimple(self):
@@ -139,7 +142,7 @@ class Curso(models.Model):
             "nivel": self.nivel.getJSONSimple()
         }
 
-class Periodo(models.Model):
+class Periodo(models.Model, PeriodoInterface):
     codigo = models.CharField(max_length=255, unique=True)
     def getJSONSimple(self):
         return {
@@ -149,7 +152,7 @@ class Periodo(models.Model):
     def getPeriodo(self):
         return self.codigo
    
-class Seccion(models.Model):
+class Seccion(models.Model, PeriodoInterface):
     codigo = models.IntegerField()
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE, blank=False, related_name='secciones')
     periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE, blank=False, related_name='secciones')
@@ -179,7 +182,7 @@ class Seccion(models.Model):
         return self.periodo.getPeriodo()
 
  
-class Asesoria(models.Model):
+class Asesoria(models.Model, PeriodoInterface, FechaInterface):
     fecha_inicio = models.DateTimeField()
     fecha_fin = models.DateTimeField()
     enlace = models.TextField()
@@ -207,9 +210,8 @@ class Asesoria(models.Model):
         return self.seccion.getPeriodo()
     def getFecha(self):
         return self.fecha_fin
-    
 
-class Reserva(models.Model):
+class Reserva(models.Model, PeriodoInterface, FechaInterface):
     codigo = models.IntegerField()
     estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE, blank=False, related_name='reservas')
     asesoria = models.ForeignKey(Asesoria, on_delete=models.CASCADE, blank=False, related_name='reservas')
@@ -252,8 +254,3 @@ class Singleton(SingletonModel):
         self.periodoActual = nuevoPeriodo
     def getFechaActual(self):
         return datetime.now().replace(tzinfo=timezone.utc)
-
-# Factory method para crear Cuentas y Personas
-
-
-# Controlar el periodo actual
