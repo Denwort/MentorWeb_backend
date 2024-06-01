@@ -84,6 +84,33 @@ class GestionPersonas:
         
         return JsonResponse(profesor.getAsesorias(), safe=False)
 
+# Seccion para la navegacion del repositorio
+class GestionRepositorio:
+
+    @require_http_methods(["POST"])
+    def cursos(request):
+
+        r = DecoratorKeyword(RequestExtractor(request))
+        [keyword] = r.extract()
+
+        cursos = Curso.objects.filter(nombre__icontains=keyword)
+        
+        return JsonResponse([curso.getJSONDerecha() for curso in cursos], safe=False)
+
+#   Esto seria para examenes
+    @require_http_methods(["POST"])
+    def curso(request):
+
+        r = DecoratorCursoId(RequestExtractor(request))
+        [curso_id] = r.extract()
+
+        curso = Curso.objects.filter(id=curso_id).first()
+
+        if not curso:
+            return HttpResponseBadRequest("curso inexistente")
+        
+        return JsonResponse(curso.getJSONDerecha(), safe=False)
+
 class GestionAsesorias:
     
     @staticmethod
@@ -194,6 +221,12 @@ class DecoratorKeyword(Decorator):
 class DecoratorAsesoriaId(Decorator):
     def extract(self):
         self.lista.append('asesoria_id')
+        return self.component.extract()
+
+# Para el repositorio
+class DecoratorCursoId(Decorator):
+    def extract(self):
+        self.lista.append('curso_id')
         return self.component.extract()
 
 class GestionarStrings:
