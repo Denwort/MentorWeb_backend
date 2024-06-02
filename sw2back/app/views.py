@@ -1,10 +1,15 @@
-from django.http import HttpResponseBadRequest, JsonResponse
+from bs4 import BeautifulSoup
+from django.http import HttpResponseBadRequest, JsonResponse, Http404
 from django.views.decorators.http import require_http_methods
+import requests
+import unidecode
 from app.models import *
 #from sw2back.app.clases.patrones import *
 #from sw2back.app.clases.seeders import *
 from datetime import datetime
-
+import json
+import pandas as pd
+from django.shortcuts import get_object_or_404
 
 class GestionCuentas:
 
@@ -84,33 +89,6 @@ class GestionPersonas:
         
         return JsonResponse(profesor.getAsesorias(), safe=False)
 
-# Seccion para la navegacion del repositorio
-class GestionRepositorio:
-
-    @require_http_methods(["POST"])
-    def cursos(request):
-
-        r = DecoratorKeyword(RequestExtractor(request))
-        [keyword] = r.extract()
-
-        cursos = Curso.objects.filter(nombre__icontains=keyword)
-        
-        return JsonResponse([curso.getJSONDerecha() for curso in cursos], safe=False)
-
-#   Esto seria para examenes
-    @require_http_methods(["POST"])
-    def curso(request):
-
-        r = DecoratorCursoId(RequestExtractor(request))
-        [curso_id] = r.extract()
-
-        curso = Curso.objects.filter(id=curso_id).first()
-
-        if not curso:
-            return HttpResponseBadRequest("curso inexistente")
-        
-        return JsonResponse(curso.getJSONDerecha(), safe=False)
-
 class GestionAsesorias:
     
     @staticmethod
@@ -173,10 +151,17 @@ class RequestExtractor(Extractor):
         self.lista.clear()
         self.request = request
     def extract(self):
-        data_json = json.loads(self.request.body.decode('utf-8'))
+        data_json = {}
+        try:
+            data_json = json.loads(self.request.body.decode('utf-8'))
+        except (json.JSONDecodeError, UnicodeDecodeError) as e:
+            raise Http404("Error al procesar la solicitud")
         res = []
         for l in self.lista:
-            res.append(data_json[l])            
+            try:
+                res.append(data_json[l])
+            except (KeyError, ValueError) as e:
+                raise Http404("Falta la clave ${l} en la solicitud")       
         return res
 
 class Decorator(Extractor):
@@ -372,3 +357,40 @@ class GestionarInformacion:
                     enlace = fila['Enlace Virtual']
                     a, _ = Asesoria.objects.get_or_create(seccion=s, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, ambiente=ambiente, enlace=enlace)
 
+
+# Sprint 2
+class GestionRepositorio:
+
+    @require_http_methods(["POST"])
+    def cursos(request):
+
+        r = DecoratorKeyword(RequestExtractor(request))
+        [keyword] = r.extract()
+
+        cursos = Curso.objects.filter(nombre__icontains=keyword)
+        
+        return JsonResponse([curso.getJSONDerecha() for curso in cursos], safe=False)
+
+    @require_http_methods(["POST"])
+    def curso(request):
+
+        r = DecoratorCursoId(RequestExtractor(request))
+        [curso_id] = r.extract()
+        print(curso_id)
+
+        curso = Curso.objects.filter(id=curso_id).first()
+
+        if not curso:
+            return HttpResponseBadRequest("curso inexistente")
+        
+        return JsonResponse(curso.getJSONDerecha(), safe=False)
+
+    @require_http_methods(["POST"])
+    def documentos(request):
+
+        r = DecoratorCursoId(RequestExtractor(request))
+        [curso_id] = r.extract()
+
+        curso = get_object_or_404(Curso, id=curso_id)
+        
+        return JsonResponse(curso.getDocumentos(), safe=False)

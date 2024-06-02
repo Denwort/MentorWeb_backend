@@ -1,12 +1,8 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from django.db import models
-import json
-from unidecode import unidecode
 from datetime import datetime, timedelta, timezone
-from bs4 import BeautifulSoup
-import requests
-import pandas as pd
+import uuid 
 
 # Interfaces
 class PeriodoInterface:
@@ -141,6 +137,15 @@ class Curso(models.Model):
             "carrera": self.carrera.getJSONSimple(),
             "nivel": self.nivel.getJSONSimple()
         }
+    def getDocumentos(self):
+        return {
+            "id": self.id,
+            "codigo": self.codigo,
+            "nombre": self.nombre,
+            "carrera": self.carrera.getJSONSimple(),
+            "nivel": self.nivel.getJSONSimple(),
+            "secciones": [seccion.getDocumentos() for seccion in self.secciones.all()]
+        } 
 
 class Periodo(models.Model, PeriodoInterface):
     codigo = models.CharField(max_length=255, unique=True)
@@ -180,6 +185,14 @@ class Seccion(models.Model, PeriodoInterface):
         }
     def getPeriodo(self):
         return self.periodo.getPeriodo()
+    def getDocumentos(self):
+        return {
+            "id": self.id,
+            "codigo": self.codigo,
+            "periodo": self.periodo.getJSONSimple(),
+            "profesor": self.profesor.getJSONSimple(),
+            "documentos": [documento.getJSONSimple() for documento in self.documentos.all()]
+        }
 
  
 class Asesoria(models.Model, PeriodoInterface, FechaInterface):
@@ -254,3 +267,18 @@ class Singleton(SingletonModel):
         self.periodoActual = nuevoPeriodo
     def getFechaActual(self):
         return datetime.now().replace(tzinfo=timezone.utc)
+
+
+# Sprint 2
+
+# Examenes
+
+
+class Documento(models.Model):
+    def generar_nombre_unico(instance, filename):
+        ext = filename.split('.')[-1]  # Obtener la extensión del archivo
+        nombre_archivo = f"{uuid.uuid4().hex}.{ext}"  # Generar un nombre único usando UUID
+        return f"documentos/{nombre_archivo}"
+    nombre = models.CharField(max_length=255)
+    archivo = models.FileField(upload_to=generar_nombre_unico)
+    seccion = models.ForeignKey(Seccion, on_delete=models.CASCADE, blank=False, related_name='documentos')
