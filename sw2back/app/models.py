@@ -58,7 +58,7 @@ class Cuenta(models.Model):
         }
 
 class Estudiante(Persona):
-    correo = models.CharField(max_length=255)
+    correo = models.CharField(max_length=255, unique=False)
     def __str__(self):
         return "Estudiante={nombres=" + self.nombres + "; correo=" + self.correo + "; cuenta=" + str(self.cuenta)
     def getJSONSimple(self):
@@ -69,11 +69,9 @@ class Estudiante(Persona):
             "correo": self.correo
         }
     def getReservas(self):
-        s = Singleton.load()
-        periodo_actual = s.getPeriodoActual()
-        fecha_actual = s.getFechaActual()
         return [reserva.getJSONAsesoria() for reserva in self.reservas.all() if 
-                (reserva.getPeriodo() == periodo_actual and reserva.getFecha() >= fecha_actual)]
+                (reserva.enPeriodoActual() and reserva.mayorAFechaActual())]
+                #(reserva.getPeriodo() == periodo_actual and reserva.getFecha() >= fecha_actual)]
 
 class Administrador(Persona):
     celular = models.CharField(max_length=255)
@@ -99,13 +97,11 @@ class Profesor(Persona):
             "foto": self.foto,
         }
     def getAsesorias(self):
-        s = Singleton.load()
-        periodo_actual = s.getPeriodoActual()
         return {
             "id": self.id,
             "nombres": self.nombres,
             "foto": self.foto,
-            "secciones": [seccion.getJSONArriba() for seccion in self.secciones.all() if seccion.getPeriodo() == periodo_actual]
+            "secciones": [seccion.getJSONArriba() for seccion in self.secciones.all() if seccion.enPeriodoActual()]
         }
     
 class Carrera(models.Model):
@@ -154,16 +150,22 @@ class Periodo(models.Model, PeriodoInterface):
             "id": self.id,
             "codigo": self.codigo
         }
-    def getPeriodo(self):
-        return self.codigo
+    def enPeriodoActual(self):
+        s = Singleton.load()
+        periodo_actual = s.getPeriodoActual()
+        return self.codigo == periodo_actual
    
 class Seccion(models.Model, PeriodoInterface):
     codigo = models.IntegerField()
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE, blank=False, related_name='secciones')
     periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE, blank=False, related_name='secciones')
     profesor = models.ForeignKey(Profesor, on_delete=models.CASCADE, blank=False, related_name='secciones')
-    def __str__(self):
-        return "Seccion={codigo=" + str(self.codigo) + "}"
+    def getJSONConProfesor(self):
+        return {
+            "id": self.id,
+            "codigo": self.codigo,
+            "profesor": self.profesor.getJSONSimple()
+        }
     def getJSONDerecha(self):
         return {
             "id": self.id,
@@ -173,18 +175,16 @@ class Seccion(models.Model, PeriodoInterface):
             "profesor": self.profesor.getJSONSimple(),
         }
     def getJSONArriba(self):
-        s = Singleton.load()
-        fecha_actual = s.getFechaActual()
         return {
             "id": self.id,
             "codigo": self.codigo,
             "curso": self.curso.getJSONDerecha(),
             "periodo": self.periodo.getJSONSimple(),
             "asesorias": [asesoria.getJSONSimple() for asesoria in self.asesorias.all() if 
-                (asesoria.getFecha() >= fecha_actual)]
+                (asesoria.mayorAFechaActual())]
         }
-    def getPeriodo(self):
-        return self.periodo.getPeriodo()
+    def enPeriodoActual(self):
+        return self.periodo.enPeriodoActual()
     def getDocumentos(self):
         return {
             "id": self.id,
@@ -219,10 +219,12 @@ class Asesoria(models.Model, PeriodoInterface, FechaInterface):
             "ambiente": self.ambiente,
             "seccion": self.seccion.getJSONDerecha(),
         }
-    def getPeriodo(self):
-        return self.seccion.getPeriodo()
-    def getFecha(self):
-        return self.fecha_fin
+    def enPeriodoActual(self):
+        return self.seccion.enPeriodoActual()
+    def mayorAFechaActual(self):
+        s = Singleton.load()
+        fecha_actual = s.getFechaActual()
+        return self.fecha_fin >= fecha_actual
 
 class Reserva(models.Model, PeriodoInterface, FechaInterface):
     codigo = models.IntegerField()
@@ -241,10 +243,10 @@ class Reserva(models.Model, PeriodoInterface, FechaInterface):
             "codigo": self.codigo,
             "asesoria": self.asesoria.getJSONDerecha()
         }
-    def getPeriodo(self):
-        return self.asesoria.getPeriodo()
-    def getFecha(self):
-        return self.asesoria.getFecha()
+    def enPeriodoActual(self):
+        return self.asesoria.enPeriodoActual()
+    def mayorAFechaActual(self):
+        return self.asesoria.mayorAFechaActual()
 
 # Singleton para marcar el Periodo actual y la fecha actual
     
@@ -271,14 +273,58 @@ class Singleton(SingletonModel):
 
 # Sprint 2
 
-# Examenes
-
-
 class Documento(models.Model):
+    nombre = models.CharField(max_length=255)
+    archivo = models.FileField(upload_to="archivos/")
+    seccion = models.ForeignKey(Seccion, on_delete=models.CASCADE, blank=False, related_name='documentos')
+    def getJSONSimple(self):
+        return {
+            "id": self.id,
+            "nombre": self.nombre,
+            "archivo": self.archivo
+        }
+    def getJSONConSeccion(self):
+        return {
+            "id": self.id,
+            "nombre": self.nombre,
+            "archivo": self.archivo,
+            "seccion": self.seccion.getJSONDerecha()
+        }
+
+class Ticket(models.Model):
     def generar_nombre_unico(instance, filename):
         ext = filename.split('.')[-1]  # Obtener la extensión del archivo
         nombre_archivo = f"{uuid.uuid4().hex}.{ext}"  # Generar un nombre único usando UUID
-        return f"documentos/{nombre_archivo}"
-    nombre = models.CharField(max_length=255)
+        return f"archivos/{nombre_archivo}"
+    asunto = models.CharField(max_length=255)
+    descripcion = models.TextField()
+    comentario = models.TextField()
     archivo = models.FileField(upload_to=generar_nombre_unico)
-    seccion = models.ForeignKey(Seccion, on_delete=models.CASCADE, blank=False, related_name='documentos')
+    estado = models.CharField(max_length=255, default="Pendiente")
+    estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE, blank=False, related_name='tickets')
+    seccion = models.ForeignKey(Seccion, on_delete=models.CASCADE, blank=False, related_name='tickets')
+    def getJSONSimple(self):
+        return {
+            "id": self.id,
+            "asunto": self.asunto,
+            "descripcion": self.descripcion,
+            "comentario": self.comentario,
+            "archivo": self.archivo,
+            "estado": self.estado
+        }
+    def getJSONCompleto(self):
+        return {
+            "id": self.id,
+            "asunto": self.asunto,
+            "descripcion": self.descripcion,
+            "comentario": self.comentario,
+            "archivo": self.archivo,
+            "estado": self.estado,
+            "estudiante": self.estudiante.getJSONSimple(),
+            "seccion": self.seccion.getJSONDerecha()
+        }
+    
+class Historial(models.Model):
+    estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE, blank=False, related_name='historial')
+    documento = models.ForeignKey(Documento, on_delete=models.CASCADE, blank=False, related_name='historial')
+    fecha_revision = models.DateTimeField(auto_now_add=True)
