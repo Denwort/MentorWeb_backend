@@ -28,5 +28,6 @@ https://docs.djangoproject.com/en/5.0/topics/db/models/
 | **Obtener Detalle de Ticket**         | http://127.0.0.1:8000/ticket/               | `{ "ticket_id": "1" }`                                                                                   |
 | **Aceptar Ticket**                    | http://127.0.0.1:8000/aceptar/              | `{ "ticket_id": "1", "comentario": "Comentario de aceptación", "nombre": "Nombre del documento", "descripcion": "Descripción del documento" }` |
 | **Rechazar Ticket**                   | http://127.0.0.1:8000/rechazar/             | `{ "ticket_id": "1", "comentario": "Comentario de rechazo" }`                                            |
+| **Obtener Tickets de Estudiante**     | http://127.0.0.1:8000/tickets/              | `{ "estudiante_id": "144" }`                                                                             |
 
 **Nota:** Todos los endpoints utilizan el método POST.

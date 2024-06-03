@@ -23,6 +23,7 @@ urlpatterns = [
     path('ticket/', views.GestionTickets.ticket, name='ticket'),
     path('aceptar/', views.GestionTickets.aceptar, name='aceptar'),
     path('rechazar/', views.GestionTickets.rechazar, name='rechazar'),
+    path('tickets/', views.GestionTickets.tickets, name='tickets'),
     
     path('cargar/', views.GestionAdministrador.cargar, name='cargar'),
 ]

@@ -547,4 +547,6 @@ class GestionTickets:
 
         estudiante = get_object_or_404(Estudiante, id=estudiante_id)
 
-        return JsonResponse([ticket.getJSONCompleto() for ticket in estudiante.tickets], safe=False)
+        tickets = estudiante.tickets.all()
+
+        return JsonResponse([ticket.getJSONCompleto() for ticket in tickets], safe=False)
