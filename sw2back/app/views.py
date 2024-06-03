@@ -225,9 +225,17 @@ class DecoratorTicketId(Decorator):
     def extract(self):
         self.lista.append('ticket_id')
         return self.component.extract()
+class DecoratorNombre(Decorator):
+    def extract(self):
+        self.lista.append('nombre')
+        return self.component.extract()
+class DecoratorDescripcion(Decorator):
+    def extract(self):
+        self.lista.append('descripcion')
+        return self.component.extract()
 class DecoratorComentario(Decorator):
     def extract(self):
-        self.lista.append('ticket_id')
+        self.lista.append('comentario')
         return self.component.extract()
 
 class GestionarStrings:
@@ -378,6 +386,16 @@ class GestionarInformacion:
 class GestionRepositorio:
 
     @require_http_methods(["POST"])
+    def recientes(request):
+        r = DecoratorEstudianteId(RequestExtractor(request))
+        [estudiante_id] = r.extract()
+
+        estudiante = get_object_or_404(Estudiante, id=estudiante_id)
+        historial = estudiante.historial.all().order_by('-fecha_revision')
+        
+        return JsonResponse([hist.documento.getJSONConSeccion() for hist in historial], safe=False)
+
+    @require_http_methods(["POST"])
     def cursos(request):
 
         r = DecoratorKeyword(RequestExtractor(request))
@@ -435,6 +453,16 @@ class GestionRepositorio:
 class GestionTickets:
     
     @require_http_methods(["POST"])
+    def periodos(request):
+        periodos = Periodo.objects.all()
+        return JsonResponse([periodo.getJSONSimple() for periodo in periodos], safe=False)
+    
+    @require_http_methods(["POST"])
+    def cursos(request):
+        cursos = Curso.objects.all()
+        return JsonResponse([curso.getJSONDerecha() for curso in cursos], safe=False)
+
+    @require_http_methods(["POST"])
     def buscar_seccion(request):
 
         r = DecoratorPeriodoId(DecoratorCursoId(RequestExtractor(request)))
@@ -456,7 +484,6 @@ class GestionTickets:
         asunto = request.POST.get('asunto')
         comentario = request.POST.get('comentario')
         estado = "Pendiente"
-        
         archivo = request.FILES['archivo']
 
         estudiante = get_object_or_404(Estudiante, id=estudiante_id)
@@ -485,19 +512,18 @@ class GestionTickets:
 
     @require_http_methods(["POST"])
     def aceptar(request):
-        r = DecoratorTicketId(DecoratorComentario(RequestExtractor(request)))
-        [ticket_id, comentario] = r.extract()
+        r = DecoratorTicketId(DecoratorComentario(DecoratorNombre(DecoratorDescripcion(RequestExtractor(request)))))
+        [ticket_id, comentario, nombre, descripcion] = r.extract()
 
         ticket = get_object_or_404(Ticket, id=ticket_id)
         ticket.estado = "Aceptado"
         ticket.comentario = comentario
         ticket.save()
         
-        nombre = ticket.asunto
         archivo = ticket.archivo
         seccion = ticket.seccion
 
-        documento = Documento(nombre=nombre, archivo=archivo, seccion=seccion)
+        documento = Documento(nombre=nombre, descripcion=descripcion, archivo=archivo, seccion=seccion)
         documento.save()
 
         return JsonResponse(documento.getJSONSimple(), safe=False)
@@ -514,12 +540,11 @@ class GestionTickets:
 
         return JsonResponse(ticket.getJSONCompleto(), safe=False)
     
-    def recientes(request):
+    @require_http_methods(["POST"])
+    def tickets(request):
         r = DecoratorEstudianteId(RequestExtractor(request))
         [estudiante_id] = r.extract()
 
         estudiante = get_object_or_404(Estudiante, id=estudiante_id)
-        historial = estudiante.historial.all().order_by('-fecha_revision')
-        
-        return JsonResponse([documento.getJSONConSeccion() for documento in historial.documentos.all()], safe=False)
-    
+
+        return JsonResponse([ticket.getJSONCompleto() for ticket in estudiante.tickets], safe=False)

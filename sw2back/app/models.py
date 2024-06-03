@@ -275,19 +275,22 @@ class Singleton(SingletonModel):
 
 class Documento(models.Model):
     nombre = models.CharField(max_length=255)
+    descripcion = models.TextField()
     archivo = models.FileField(upload_to="archivos/")
     seccion = models.ForeignKey(Seccion, on_delete=models.CASCADE, blank=False, related_name='documentos')
     def getJSONSimple(self):
         return {
             "id": self.id,
             "nombre": self.nombre,
-            "archivo": self.archivo
+            "descripcion": self.descripcion,
+            "archivo": self.archivo.url
         }
     def getJSONConSeccion(self):
         return {
             "id": self.id,
             "nombre": self.nombre,
-            "archivo": self.archivo,
+            "descripcion": self.descripcion,
+            "archivo": self.archivo.url,
             "seccion": self.seccion.getJSONDerecha()
         }
 
@@ -309,7 +312,7 @@ class Ticket(models.Model):
             "asunto": self.asunto,
             "descripcion": self.descripcion,
             "comentario": self.comentario,
-            "archivo": self.archivo,
+            "archivo": self.archivo.url,
             "estado": self.estado
         }
     def getJSONCompleto(self):
@@ -318,7 +321,7 @@ class Ticket(models.Model):
             "asunto": self.asunto,
             "descripcion": self.descripcion,
             "comentario": self.comentario,
-            "archivo": self.archivo,
+            "archivo": self.archivo.url,
             "estado": self.estado,
             "estudiante": self.estudiante.getJSONSimple(),
             "seccion": self.seccion.getJSONDerecha()

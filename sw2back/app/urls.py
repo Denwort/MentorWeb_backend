@@ -11,6 +11,7 @@ urlpatterns = [
 
     path('reservar/', views.GestionAsesorias.reservar, name='reservar'),
 
+    path('recientes/', views.GestionRepositorio.recientes, name='recientes'),
     path('cursos/', views.GestionRepositorio.cursos, name='cursos'),
     path('curso/', views.GestionRepositorio.curso, name='curso'),
     path('documentos/', views.GestionRepositorio.documentos, name='documentos'),
@@ -22,7 +23,6 @@ urlpatterns = [
     path('ticket/', views.GestionTickets.ticket, name='ticket'),
     path('aceptar/', views.GestionTickets.aceptar, name='aceptar'),
     path('rechazar/', views.GestionTickets.rechazar, name='rechazar'),
-    path('recientes/', views.GestionTickets.recientes, name='recientes'),
     
     path('cargar/', views.GestionAdministrador.cargar, name='cargar'),
 ]
