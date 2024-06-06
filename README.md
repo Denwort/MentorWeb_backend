@@ -6,6 +6,11 @@ Pasos:
 2. Moverse al proyecto (cd sw2back)
 3. Ejecutar el proyecto (py manage.py runserver)
 
+Liberias:
+1. pip install django-cors-headers
+2. pip install beautifulsoup4
+3. pip install requests
+
 Modelos y Clases en Django:
 https://docs.djangoproject.com/en/5.0/topics/db/models/
 
