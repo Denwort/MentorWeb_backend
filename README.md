@@ -25,8 +25,8 @@ https://docs.djangoproject.com/en/5.0/topics/db/models/
 | **Obtener Detalles de un Profesor**   | http://127.0.0.1:8000/profesor/             | `{ "profesor_id": "24" }`                                                                                 |
 | **Reservar Asesoría**                 | http://127.0.0.1:8000/reservar/             | `{ "estudiante_id": "144", "asesoria_id": "15" }`                                                         |
 | **Cargar Datos de Excel**             | http://127.0.0.1:8000/cargar/               | `-F "excel_secciones=@2024-1_Horarios_Cursos_Sección.xlsx" -F "excel_asesorias=@Atención_alumnos_2024-1.xlsx" -d '{"periodo": "2024-1", "fecha_inicio": "2024-04-01"}'` |
-| **Obtener Periodos**                  | http://127.0.0.1:8000/periodos/             | `{}`                                                                                                     |
-| **Obtener Cursos**                    | http://127.0.0.1:8000/cursos/               | `{}`                                                                                                     |
+| **Obtener Periodos**                  | http://127.0.0.1:8000/obtener_periodos/             | `{}`                                                                                                     |
+| **Obtener Cursos**                    | http://127.0.0.1:8000/obtener_cursos/               | `{}`                                                                                                     |
 | **Buscar Sección**                    | http://127.0.0.1:8000/buscar_seccion/       | `{ "periodo_id": "1", "curso_id": "2" }`                                                                 |
 | **Crear Ticket**                      | http://127.0.0.1:8000/crear/                | `-F "estudiante_id=144" -F "seccion_id=101" -F "asunto=Asunto del ticket" -F "comentario=Comentario del ticket" -F "archivo=@ruta/al/archivo.pdf"` |
 | **Obtener Tickets Pendientes**        | http://127.0.0.1:8000/pendientes/           | `{}`                                                                                                     |
