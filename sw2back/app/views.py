@@ -453,12 +453,12 @@ class GestionRepositorio:
 class GestionTickets:
     
     @require_http_methods(["POST"])
-    def periodos(request):
+    def obtener_periodos(request):
         periodos = Periodo.objects.all()
         return JsonResponse([periodo.getJSONSimple() for periodo in periodos], safe=False)
     
     @require_http_methods(["POST"])
-    def cursos(request):
+    def obtener_cursos(request):
         cursos = Curso.objects.all()
         return JsonResponse([curso.getJSONDerecha() for curso in cursos], safe=False)
 

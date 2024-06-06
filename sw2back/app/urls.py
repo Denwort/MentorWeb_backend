@@ -18,6 +18,8 @@ urlpatterns = [
     path('documento/', views.GestionRepositorio.documento, name='documento'),
 
     path('buscar_seccion/', views.GestionTickets.buscar_seccion, name='buscar_seccion'),
+    path('obtener_cursos/', views.GestionTickets.periodos, name='periodos'),
+    path('buscar_seccion/', views.GestionTickets.buscar_seccion, name='buscar_seccion'),
     path('crear/', views.GestionTickets.crear, name='crear'),
     path('pendientes/', views.GestionTickets.pendientes, name='pendientes'),
     path('ticket/', views.GestionTickets.ticket, name='ticket'),
