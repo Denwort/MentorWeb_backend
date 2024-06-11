@@ -38,6 +38,17 @@ class Persona(models.Model):
     def getJSONSimple(self):
         pass
 
+class PreguntaDeSeguridad(models.Model):
+    texto=models.CharField(max_length=255)
+    def getJSONSimple(self):
+        return {
+            "id": self.id,
+            "texto": self.texto,
+        }
+    @staticmethod
+    def get_default_pregunta():
+        return PreguntaDeSeguridad.objects.get(pk=1).id
+
 class Cuenta(models.Model):
     usuario = models.CharField(max_length=255, unique=True)
     contrasenha = models.CharField(max_length=255)
@@ -47,6 +58,8 @@ class Cuenta(models.Model):
         blank=False,
         related_name="cuenta"
     )
+    pregunta = models.ForeignKey(PreguntaDeSeguridad, on_delete=models.CASCADE, blank=False,default=PreguntaDeSeguridad.get_default_pregunta(), related_name='cuentas')
+    respuesta = models.CharField(max_length=255,default="nina")
     def __str__(self):
         return "Cuenta={usuario=" + self.usuario + "; contrasenha= " + self.contrasenha + "}"
     def getJSONPersona(self):
@@ -55,6 +68,13 @@ class Cuenta(models.Model):
             "usuario": self.usuario,
             "contrasenha": self.contrasenha,
             "persona": self.persona.getPersona().getJSONSimple()
+        }
+    def getJSONPregunta(self):
+        return {
+            "id": self.id,
+            "usuario": self.usuario,
+            "contrasenha": self.contrasenha,
+            "pregunta": self.pregunta.getJSONSimple()
         }
 
 class Estudiante(Persona):
@@ -270,7 +290,6 @@ class Singleton(SingletonModel):
     def getFechaActual(self):
         return datetime.now().replace(tzinfo=timezone.utc)
 
-
 # Sprint 2
 
 class Documento(models.Model):
@@ -331,3 +350,4 @@ class Historial(models.Model):
     estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE, blank=False, related_name='historial')
     documento = models.ForeignKey(Documento, on_delete=models.CASCADE, blank=False, related_name='historial')
     fecha_revision = models.DateTimeField(auto_now_add=True)
+    
