@@ -47,7 +47,7 @@ class PreguntaDeSeguridad(models.Model):
         }
     @staticmethod
     def get_default_pregunta():
-        return PreguntaDeSeguridad.objects.get(pk=1).id
+        return 1
 
 class Cuenta(models.Model):
     usuario = models.CharField(max_length=255, unique=True)

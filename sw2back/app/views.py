@@ -53,18 +53,16 @@ class GestionCuentas:
     
     @require_http_methods(["POST"])
     def recuperar(request):
-
         r = DecoratorUsuario(DecoratorNombres(RequestExtractor(request)))
         [usuario, nombres] = r.extract()
-        print(usuario)
-        print(nombres)
+
         persona = get_object_or_404(Persona,nombres=nombres)
-        #Persona.objects.filter(nombres=nombres).exists()
-        #if not cuenta:
+        #persona = Persona.objects.filter(nombres=nombres).exists()
+        #if not persona:
         #    return HttpResponseBadRequest("No existe la persona")
         
         cuenta = get_object_or_404(Cuenta,usuario=usuario, persona=persona)
-        #Cuenta.objects.filter(usuario=usuario, persona=persona).first()
+        #cuenta = Cuenta.objects.filter(usuario=usuario, persona=persona).first()
         #if not cuenta:
         #    return HttpResponseBadRequest("Contraseña incorrecta")
             
