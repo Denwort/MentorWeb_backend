@@ -4,7 +4,10 @@ from . import views
 urlpatterns = [
     path('registrar/', views.GestionCuentas.register, name='register'),
     path('login/', views.GestionCuentas.login, name='login'),
-    path('recuperar/', views.GestionCuentas.recuperar, name='recuperar'),
+    path('recuperarPregunta/', views.GestionCuentas.recuperarPregunta, name='recuperarPregunta'),
+    path('recuperarRespuesta/', views.GestionCuentas.recuperarRespuesta, name='recuperarRespuesta'),
+    path('verPerfil/', views.GestionCuentas.verPerfil, name='verPerfil'),
+    path('editarPerfilEstudiante/', views.GestionCuentas.editarPerfilEstudiante, name='editarPerfilEstudiante'),
     
     path('asesorias_estudiante/', views.GestionPersonas.asesorias_estudiante, name='asesorias_estudiante'),
     path('profesores/', views.GestionPersonas.profesores, name='profesores'),

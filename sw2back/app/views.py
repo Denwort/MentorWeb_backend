@@ -52,7 +52,7 @@ class GestionCuentas:
         return JsonResponse(cuenta.getJSONPersona(), safe=False)
     
     @require_http_methods(["POST"])
-    def recuperar(request):
+    def recuperarPregunta(request):
         r = DecoratorUsuario(DecoratorNombres(RequestExtractor(request)))
         [usuario, nombres] = r.extract()
 
@@ -67,6 +67,51 @@ class GestionCuentas:
         #    return HttpResponseBadRequest("Contraseña incorrecta")
             
         return JsonResponse(cuenta.getJSONPregunta(), safe=False)
+
+    @require_http_methods(["POST"])
+    def recuperarRespuesta(request):
+        r = DecoratorUsuario(DecoratorRespuesta(RequestExtractor(request)))
+        [usuario,respuesta] = r.extract()
+        
+        cuenta = get_object_or_404(Cuenta,usuario=usuario, respuesta=respuesta)
+            
+        return JsonResponse(cuenta.getJSONPregunta(), safe=False)
+    
+    @require_http_methods(["POST"])
+    def recuperarContrasenha(request):
+        r = DecoratorUsuario(DecoratorNuevaContrasenia(RequestExtractor(request)))
+        [usuario,nuevaContrasenia] = r.extract()
+        
+        cuenta = get_object_or_404(Cuenta,usuario=usuario)
+        cuenta.contrasenia = nuevaContrasenia
+        cuenta.save()
+        
+        return JsonResponse(cuenta.getJSONPregunta(), safe=False)
+
+    @require_http_methods(["POST"])
+    def verPerfil(request):
+        r = DecoratorCuentaId(RequestExtractor(request))
+        [cuenta_id] = r.extract()
+
+        cuenta = get_object_or_404(Cuenta,id=cuenta_id)
+        persona = get_object_or_404(Persona,id=cuenta.persona_id)
+        persona = persona.getPersona()
+        
+        return JsonResponse(persona.getJSONSimple(), safe=False)
+    
+    @require_http_methods(["POST"])
+    def editarPerfilEstudiante(request):
+        r = DecoratorCuentaId(DecoratorUsuario(DecoratorContrasenha(DecoratorNombres(DecoratorCorreo(RequestExtractor(request))))))
+        [cuenta_id,usuario, contrasenha, nombres, correo] = r.extract()
+
+        cuenta = get_object_or_404(Cuenta,id=cuenta_id)
+        cuenta.usuario = usuario
+        cuenta.contrasenha = contrasenha
+        persona = get_object_or_404(Persona,id=cuenta.persona_id)
+        persona.nombres = nombres
+        persona.correo = correo
+        
+        return JsonResponse(persona.getJSONSimple(), safe=False)
 
 class GestionPersonas:
 
@@ -224,7 +269,14 @@ class DecoratorAsesoriaId(Decorator):
     def extract(self):
         self.lista.append('asesoria_id')
         return self.component.extract()
-
+class DecoratorRespuesta(Decorator):
+    def extract(self):
+        self.lista.append('respuesta')
+        return self.component.extract()
+class DecoratorNuevaContrasenia(Decorator):
+    def extract(self):
+        self.lista.append('Contrasenia')
+        return self.component.extract()
 # Para el repositorio
 class DecoratorCursoId(Decorator):
     def extract(self):
@@ -253,6 +305,10 @@ class DecoratorDescripcion(Decorator):
 class DecoratorComentario(Decorator):
     def extract(self):
         self.lista.append('comentario')
+        return self.component.extract()
+class DecoratorCuentaId(Decorator):
+    def extract(self):
+        self.lista.append('cuenta_id')
         return self.component.extract()
 
 class GestionarStrings:
