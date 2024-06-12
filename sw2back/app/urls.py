@@ -12,6 +12,7 @@ urlpatterns = [
     path('asesorias_estudiante/', views.GestionPersonas.asesorias_estudiante, name='asesorias_estudiante'),
     path('profesores/', views.GestionPersonas.profesores, name='profesores'),
     path('profesor/', views.GestionPersonas.profesor, name='profesor'),
+    path('profesoresCursos/', views.GestionPersonas.profesoresCursos, name='profesoresCursos'),
 
     path('reservar/', views.GestionAsesorias.reservar, name='reservar'),
 

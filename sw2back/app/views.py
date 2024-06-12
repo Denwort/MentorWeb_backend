@@ -150,6 +150,21 @@ class GestionPersonas:
             return HttpResponseBadRequest("profesor inexistente")
         
         return JsonResponse(profesor.getAsesorias(), safe=False)
+    
+    @require_http_methods(["POST"])
+    def profesoresCursos(request):
+
+        r = DecoratorFiltro(DecoratorKeyword(RequestExtractor(request)))
+        [cursoId,keyword] = r.extract()
+
+        profesores = Profesor.objects.filter(nombres__icontains=keyword)
+        
+        secciones = Seccion.objects.filter(curso=cursoId)
+        profesor_ids = [seccion.profesor.id for seccion in secciones]
+        
+        profesores_filtrados = profesores.filter(id__in=profesor_ids)
+        
+        return JsonResponse([profesor.getJSONSimple() for profesor in profesores_filtrados], safe=False)
 
 class GestionAsesorias:
     
@@ -183,6 +198,26 @@ class GestionAsesorias:
             reserva = Reserva(codigo=codigo, estudiante=estudiante, asesoria=asesoria)
             reserva.save()
             return JsonResponse(reserva.getJSONSimple(), safe=False)
+        
+    @require_http_methods(["POST"])
+    def reservarEliminar(request):
+
+        r = DecoratorEstudianteId(DecoratorAsesoriaId(RequestExtractor(request)))
+        [estudiante_id, asesoria_id] = r.extract()
+
+        estudiante = Estudiante.objects.filter(id=estudiante_id).first()
+        asesoria = Asesoria.objects.filter(id=asesoria_id).first()
+        if estudiante is None or asesoria is None:
+            return HttpResponseNotFound("Estudiante o asesoría no encontrada")
+
+        reserva = Reserva.objects.filter(estudiante=estudiante, asesoria=asesoria).first()
+        if reserva:
+            reserva.delete()
+            return JsonResponse({'message': 'Reserva eliminada exitosamente'})
+        else:
+            return HttpResponseNotFound("Reserva no encontrada")
+
+    #no c si deba deevolver algo pero xd no me mates
         
 class GestionAdministrador:
     @require_http_methods(["POST"])
@@ -309,6 +344,10 @@ class DecoratorComentario(Decorator):
 class DecoratorCuentaId(Decorator):
     def extract(self):
         self.lista.append('cuenta_id')
+        return self.component.extract()
+class DecoratorFiltro(Decorator):
+    def extract(self):
+        self.lista.append('filtro')
         return self.component.extract()
 
 class GestionarStrings:
