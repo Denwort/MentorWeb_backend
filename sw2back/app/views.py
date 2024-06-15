@@ -510,10 +510,7 @@ class GestionRepositorio:
     @require_http_methods(["POST"])
     def cursos(request):
 
-        r = DecoratorKeyword(RequestExtractor(request))
-        [keyword] = r.extract()
-
-        cursos = Curso.objects.filter(nombre__icontains=keyword)
+        cursos = Curso.objects.all()
         
         return JsonResponse([curso.getJSONDerecha() for curso in cursos], safe=False)
 
