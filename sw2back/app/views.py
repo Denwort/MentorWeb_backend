@@ -604,6 +604,14 @@ class GestionTickets:
         return JsonResponse(ticket.getJSONSimple(), safe=False)
     
     @require_http_methods(["POST"])
+    def tickets_todos(request):
+
+        tickets = Ticket.objects.all()
+
+        return JsonResponse([ticket.getJSONCompleto() for ticket in tickets], safe=False)
+    
+
+    @require_http_methods(["POST"])
     def pendientes(request):
 
         tickets = Ticket.objects.filter(estado="Pendiente")

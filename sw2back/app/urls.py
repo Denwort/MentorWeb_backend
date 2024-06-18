@@ -26,6 +26,7 @@ urlpatterns = [
     path('obtener_periodos/', views.GestionTickets.obtener_periodos, name='obtener_periodos'),
     path('obtener_cursos/', views.GestionTickets.obtener_cursos, name='obtener_cursos'),
     path('crear/', views.GestionTickets.crear, name='crear'),
+    path('tickets_todos/', views.GestionTickets.tickets_todos, name='tickets_todos'),
     path('pendientes/', views.GestionTickets.pendientes, name='pendientes'),
     path('ticket/', views.GestionTickets.ticket, name='ticket'),
     path('aceptar/', views.GestionTickets.aceptar, name='aceptar'),
