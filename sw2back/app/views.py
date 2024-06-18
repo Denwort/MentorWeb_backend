@@ -208,14 +208,14 @@ class GestionAsesorias:
         estudiante = Estudiante.objects.filter(id=estudiante_id).first()
         asesoria = Asesoria.objects.filter(id=asesoria_id).first()
         if estudiante is None or asesoria is None:
-            return HttpResponseNotFound("Estudiante o asesoría no encontrada")
+            return HttpResponseBadRequest("Estudiante o asesoría no encontrada")
 
         reserva = Reserva.objects.filter(estudiante=estudiante, asesoria=asesoria).first()
         if reserva:
             reserva.delete()
             return JsonResponse({'message': 'Reserva eliminada exitosamente'})
         else:
-            return HttpResponseNotFound("Reserva no encontrada")
+            return HttpResponseBadRequest("Reserva no encontrada")
 
     #no c si deba deevolver algo pero xd no me mates
         
