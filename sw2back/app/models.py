@@ -79,6 +79,7 @@ class Cuenta(models.Model):
 
 class Estudiante(Persona):
     correo = models.CharField(max_length=255, unique=False)
+    foto = models.FileField(upload_to="imagenes/", default="imagenes/foto_default.png")
     def __str__(self):
         return "Estudiante={nombres=" + self.nombres + "; correo=" + self.correo + "; cuenta=" + str(self.cuenta)
     def getJSONSimple(self):
@@ -86,7 +87,8 @@ class Estudiante(Persona):
             "id": self.id,
             "tipo": self.tipo,
             "nombres": self.nombres,
-            "correo": self.correo
+            "correo": self.correo,
+            "foto": self.foto.url
         }
     def getReservas(self):
         return [reserva.getJSONAsesoria() for reserva in self.reservas.all() if 
