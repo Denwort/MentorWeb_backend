@@ -639,6 +639,8 @@ class GestionTickets:
         ticket = get_object_or_404(Ticket, id=ticket_id)
         ticket.estado = "Aceptado"
         ticket.comentario = comentario
+        ticket.asunto = nombre
+        ticket.descripcion = descripcion
         ticket.save()
         
         archivo = ticket.archivo
