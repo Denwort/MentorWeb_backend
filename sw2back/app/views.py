@@ -612,13 +612,14 @@ class GestionTickets:
 
         asunto = request.POST.get('asunto')
         comentario = request.POST.get('comentario')
+        descripcion = request.POST.get('descripcion')
         estado = "Pendiente"
         archivo = request.FILES['archivo']
 
         estudiante = get_object_or_404(Estudiante, id=estudiante_id)
         seccion = get_object_or_404(Seccion, id=seccion_id)
 
-        ticket = Ticket(asunto=asunto, comentario=comentario, estado=estado, archivo=archivo, estudiante=estudiante, seccion=seccion)
+        ticket = Ticket(asunto=asunto, comentario=comentario, descripcion=descripcion, estado=estado, archivo=archivo, estudiante=estudiante, seccion=seccion)
         ticket.save()
         
         return JsonResponse(ticket.getJSONSimple(), safe=False)
@@ -655,6 +656,8 @@ class GestionTickets:
         ticket = get_object_or_404(Ticket, id=ticket_id)
         ticket.estado = "Aceptado"
         ticket.comentario = comentario
+        ticket.asunto = nombre
+        ticket.descripcion = descripcion
         ticket.save()
         
         archivo = ticket.archivo
