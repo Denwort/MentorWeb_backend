@@ -79,8 +79,11 @@ class GestionCuentas:
     
     @require_http_methods(["POST"])
     def recuperarContrasenha(request):
+        print("xd")
         r = DecoratorUsuario(DecoratorNuevaContrasenia(RequestExtractor(request)))
         [usuario,nuevaContrasenia] = r.extract()
+
+        print("xd")
         
         cuenta = get_object_or_404(Cuenta,usuario=usuario)
         cuenta.contrasenia = nuevaContrasenia
@@ -310,7 +313,7 @@ class DecoratorRespuesta(Decorator):
         return self.component.extract()
 class DecoratorNuevaContrasenia(Decorator):
     def extract(self):
-        self.lista.append('Contrasenia')
+        self.lista.append('nuevaContrasenia')
         return self.component.extract()
 # Para el repositorio
 class DecoratorCursoId(Decorator):
