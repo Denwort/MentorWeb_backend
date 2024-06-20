@@ -97,24 +97,37 @@ class GestionCuentas:
         [cuenta_id] = r.extract()
 
         cuenta = get_object_or_404(Cuenta,id=cuenta_id)
-        persona = get_object_or_404(Persona,id=cuenta.persona_id)
-        persona = persona.getPersona()
         
-        return JsonResponse(persona.getJSONSimple(), safe=False)
+        return JsonResponse(cuenta.getJSONTodo(), safe=False)
     
     @require_http_methods(["POST"])
     def editarPerfilEstudiante(request):
-        r = DecoratorCuentaId(DecoratorUsuario(DecoratorContrasenha(DecoratorNombres(DecoratorCorreo(RequestExtractor(request))))))
-        [cuenta_id,usuario, contrasenha, nombres, correo] = r.extract()
+        
+        cuenta_id = request.POST.get('cuenta_id')
+        usuario = request.POST.get('usuario')
+        contrasenha = request.POST.get('contrasenha')
+        pregunta_id = request.POST.get('pregunta_id')
+        respuesta = request.POST.get('respuesta')
+
+        nombres = request.POST.get('nombres')
+        correo = request.POST.get('correo')
+        foto = request.FILES['foto']
 
         cuenta = get_object_or_404(Cuenta,id=cuenta_id)
         cuenta.usuario = usuario
         cuenta.contrasenha = contrasenha
-        persona = get_object_or_404(Persona,id=cuenta.persona_id)
+        pregunta = get_object_or_404(PreguntaDeSeguridad,id=pregunta_id)
+        cuenta.pregunta = pregunta
+        cuenta.respuesta = respuesta
+        cuenta.save()
+
+        persona = cuenta.persona.getPersona()
         persona.nombres = nombres
         persona.correo = correo
+        persona.foto = foto
+        persona.save()
         
-        return JsonResponse(persona.getJSONSimple(), safe=False)
+        return JsonResponse(cuenta.getJSONTodo(), safe=False)
 
 class GestionPersonas:
 
@@ -351,6 +364,10 @@ class DecoratorCuentaId(Decorator):
 class DecoratorFiltro(Decorator):
     def extract(self):
         self.lista.append('filtro')
+        return self.component.extract()
+class DecoratorPreguntaId(Decorator):
+    def extract(self):
+        self.lista.append('pregunta_id')
         return self.component.extract()
 
 class GestionarStrings:

@@ -76,6 +76,15 @@ class Cuenta(models.Model):
             "contrasenha": self.contrasenha,
             "pregunta": self.pregunta.getJSONSimple()
         }
+    def getJSONTodo(self):
+        return {
+            "id": self.id,
+            "usuario": self.usuario,
+            "contrasenha": self.contrasenha,
+            "pregunta": self.pregunta.getJSONSimple(),
+            "respuesta": self.respuesta,
+            "persona": self.persona.getPersona().getJSONSimple()
+        }
 
 class Estudiante(Persona):
     correo = models.CharField(max_length=255, unique=False)
