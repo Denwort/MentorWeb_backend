@@ -6,6 +6,7 @@ urlpatterns = [
     path('login/', views.GestionCuentas.login, name='login'),
     path('recuperarPregunta/', views.GestionCuentas.recuperarPregunta, name='recuperarPregunta'),
     path('recuperarRespuesta/', views.GestionCuentas.recuperarRespuesta, name='recuperarRespuesta'),
+    path('recuperarContrasenha/', views.GestionCuentas.recuperarContrasenha, name='recuperarContrasenha'),
     path('verPerfil/', views.GestionCuentas.verPerfil, name='verPerfil'),
     path('editarPerfilEstudiante/', views.GestionCuentas.editarPerfilEstudiante, name='editarPerfilEstudiante'),
     
