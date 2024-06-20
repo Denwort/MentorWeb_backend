@@ -86,7 +86,7 @@ class GestionCuentas:
         print("xd")
         
         cuenta = get_object_or_404(Cuenta,usuario=usuario)
-        cuenta.contrasenia = nuevaContrasenia
+        cuenta.contrasenha = nuevaContrasenia
         cuenta.save()
         
         return JsonResponse(cuenta.getJSONPregunta(), safe=False)
