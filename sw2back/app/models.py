@@ -97,7 +97,7 @@ class Estudiante(Persona):
             "tipo": self.tipo,
             "nombres": self.nombres,
             "correo": self.correo,
-            "foto": self.foto.url
+            "foto": "http://127.0.0.1:8000"+self.foto.url
         }
     def getReservas(self):
         return [reserva.getJSONAsesoria() for reserva in self.reservas.all() if 
