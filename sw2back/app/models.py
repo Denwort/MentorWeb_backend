@@ -96,7 +96,6 @@ class Estudiante(Persona):
     def getReservas(self):
         return [reserva.getJSONAsesoria() for reserva in self.reservas.all() if 
                 (reserva.enPeriodoActual() and reserva.mayorAFechaActual())]
-                #(reserva.getPeriodo() == periodo_actual and reserva.getFecha() >= fecha_actual)]
 
 class Administrador(Persona):
     celular = models.CharField(max_length=255)
