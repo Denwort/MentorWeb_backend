@@ -32,8 +32,6 @@ class Persona(models.Model):
             return Estudiante.objects.get(pk=self.pk)
         if hasattr(self, 'administrador'):
             return Administrador.objects.get(pk=self.pk)
-    def __str__(self):
-        pass
     @abstractmethod
     def getJSONSimple(self):
         pass
@@ -60,8 +58,6 @@ class Cuenta(models.Model):
     )
     pregunta = models.ForeignKey(PreguntaDeSeguridad, on_delete=models.CASCADE, blank=False,default=PreguntaDeSeguridad.get_default_pregunta(), related_name='cuentas')
     respuesta = models.CharField(max_length=255,default="nina")
-    def __str__(self):
-        return "Cuenta={usuario=" + self.usuario + "; contrasenha= " + self.contrasenha + "}"
     def getJSONPersona(self):
         return {
             "id": self.id,
@@ -89,8 +85,6 @@ class Cuenta(models.Model):
 class Estudiante(Persona):
     correo = models.CharField(max_length=255, unique=False)
     foto = models.FileField(upload_to="imagenes/", default="imagenes/foto_default.png")
-    def __str__(self):
-        return "Estudiante={nombres=" + self.nombres + "; correo=" + self.correo + "; cuenta=" + str(self.cuenta)
     def getJSONSimple(self):
         return {
             "id": self.id,
@@ -106,8 +100,6 @@ class Estudiante(Persona):
 
 class Administrador(Persona):
     celular = models.CharField(max_length=255)
-    def __str__(self):
-        return "Administrador={nombres=" + self.nombres + "; celular=" + self.celular + "; cuenta=" + str(self.cuenta)
     def getJSONSimple(self):
         return {
             "id": self.id,
@@ -118,8 +110,6 @@ class Administrador(Persona):
         
 class Profesor(Persona):
     foto = models.TextField()
-    def __str__(self):
-        return "Profesor={foto=" + self.foto + "}"
     def getJSONSimple(self):
         return {
             "id": self.id,

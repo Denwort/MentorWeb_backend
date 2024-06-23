@@ -79,12 +79,9 @@ class GestionCuentas:
     
     @require_http_methods(["POST"])
     def recuperarContrasenha(request):
-        print("xd")
         r = DecoratorUsuario(DecoratorNuevaContrasenia(RequestExtractor(request)))
         [usuario,nuevaContrasenia] = r.extract()
 
-        print("xd")
-        
         cuenta = get_object_or_404(Cuenta,usuario=usuario)
         cuenta.contrasenha = nuevaContrasenia
         cuenta.save()
@@ -539,7 +536,6 @@ class GestionRepositorio:
 
         r = DecoratorCursoId(RequestExtractor(request))
         [curso_id] = r.extract()
-        print(curso_id)
 
         curso = Curso.objects.filter(id=curso_id).first()
 
