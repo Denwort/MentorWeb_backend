@@ -98,6 +98,13 @@ class GestionCuentas:
         return JsonResponse(cuenta.getJSONTodo(), safe=False)
     
     @require_http_methods(["POST"])
+    def preguntasDeSeguridad(request):
+
+        preguntas = PreguntaDeSeguridad.objects.all()
+        
+        return JsonResponse([pregunta.getJSONSimple() for pregunta in preguntas], safe=False)
+
+    @require_http_methods(["POST"])
     def editarPerfilEstudiante(request):
         
         cuenta_id = request.POST.get('cuenta_id')
@@ -126,8 +133,8 @@ class GestionCuentas:
         
         return JsonResponse(cuenta.getJSONTodo(), safe=False)
 
-class GestionPersonas:
-
+class GestionAsesorias:
+    
     @require_http_methods(["POST"])
     def asesorias_estudiante(request):
 
@@ -179,8 +186,6 @@ class GestionPersonas:
         
         return JsonResponse([profesor.getJSONSimple() for profesor in profesores_filtrados], safe=False)
 
-class GestionAsesorias:
-    
     @staticmethod
     def generarCodigo():
         timestamp = datetime.now().timestamp()
@@ -681,8 +686,6 @@ class GestionTickets:
         r = DecoratorEstudianteId(RequestExtractor(request))
         [estudiante_id] = r.extract()
 
-        estudiante = get_object_or_404(Estudiante, id=estudiante_id)
-
-        tickets = estudiante.tickets.all()
+        tickets = Ticket.objects.filter(estudiante_id = estudiante_id)
 
         return JsonResponse([ticket.getJSONCompleto() for ticket in tickets], safe=False)

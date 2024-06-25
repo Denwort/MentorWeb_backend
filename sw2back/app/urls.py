@@ -8,14 +8,15 @@ urlpatterns = [
     path('recuperarRespuesta/', views.GestionCuentas.recuperarRespuesta, name='recuperarRespuesta'),
     path('recuperarContrasenha/', views.GestionCuentas.recuperarContrasenha, name='recuperarContrasenha'),
     path('verPerfil/', views.GestionCuentas.verPerfil, name='verPerfil'),
+    path('preguntasDeSeguridad/', views.GestionCuentas.preguntasDeSeguridad, name='preguntasDeSeguridad'),
     path('editarPerfilEstudiante/', views.GestionCuentas.editarPerfilEstudiante, name='editarPerfilEstudiante'),
     
-    path('asesorias_estudiante/', views.GestionPersonas.asesorias_estudiante, name='asesorias_estudiante'),
-    path('profesores/', views.GestionPersonas.profesores, name='profesores'),
-    path('profesor/', views.GestionPersonas.profesor, name='profesor'),
-    path('profesoresCursos/', views.GestionPersonas.profesoresCursos, name='profesoresCursos'),
-
+    path('asesorias_estudiante/', views.GestionAsesorias.asesorias_estudiante, name='asesorias_estudiante'),
+    path('profesores/', views.GestionAsesorias.profesores, name='profesores'),
+    path('profesor/', views.GestionAsesorias.profesor, name='profesor'),
+    path('profesoresCursos/', views.GestionAsesorias.profesoresCursos, name='profesoresCursos'),
     path('reservar/', views.GestionAsesorias.reservar, name='reservar'),
+    path('reservarEliminar/', views.GestionAsesorias.reservarEliminar, name='reservarEliminar'),
 
     path('recientes/', views.GestionRepositorio.recientes, name='recientes'),
     path('cursos/', views.GestionRepositorio.cursos, name='cursos'),
