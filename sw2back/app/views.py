@@ -115,7 +115,7 @@ class GestionCuentas:
 
         nombres = request.POST.get('nombres')
         correo = request.POST.get('correo')
-        foto = request.FILES['foto']
+        foto =  request.FILES['foto'] if 'foto' in request.FILES else None
 
         cuenta = get_object_or_404(Cuenta,id=cuenta_id)
         cuenta.usuario = usuario
@@ -128,7 +128,8 @@ class GestionCuentas:
         persona = cuenta.persona.getPersona()
         persona.nombres = nombres
         persona.correo = correo
-        persona.foto = foto
+        if foto:
+            persona.foto = foto
         persona.save()
         
         return JsonResponse(cuenta.getJSONTodo(), safe=False)
