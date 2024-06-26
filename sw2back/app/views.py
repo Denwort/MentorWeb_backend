@@ -568,15 +568,13 @@ class GestionRepositorio:
         estudiante = get_object_or_404(Estudiante, id=estudiante_id)
         documento = get_object_or_404(Documento, id=documento_id)
 
-        '''
-        limite = 5
-        historial = estudiante.historial.all().order_by('-fecha_revision')
+        limite = 10
+        historial = Historial.objects.filter(estudiante_id=estudiante_id).order_by('-fecha_revision')
         if historial.count() > limite:
             for revision in historial[limite:]:
                 revision.delete()
-        '''
-
-        Historial.objects.create(estudiante=estudiante, documento=documento)
+        if historial[0].documento_id != documento_id:
+            Historial.objects.create(estudiante=estudiante, documento=documento)
         
         return JsonResponse(documento.getJSONConSeccion(), safe=False)
     
