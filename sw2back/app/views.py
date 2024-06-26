@@ -573,7 +573,7 @@ class GestionRepositorio:
         if historial.count() > limite:
             for revision in historial[limite:]:
                 revision.delete()
-        if historial[0].documento_id != documento_id:
+        if str(historial[0].documento_id) != documento_id:
             Historial.objects.create(estudiante=estudiante, documento=documento)
         
         return JsonResponse(documento.getJSONConSeccion(), safe=False)
