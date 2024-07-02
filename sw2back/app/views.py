@@ -133,6 +133,48 @@ class GestionCuentas:
         persona.save()
         
         return JsonResponse(cuenta.getJSONTodo(), safe=False)
+    
+    @require_http_methods(["POST"])
+    def crear_cuenta_profesor(request):
+
+        data_json = json.loads(request.body.decode('utf-8'))
+        profesor_id = data_json['profesor_id']
+        usuario = data_json['usuario']
+        contrasenha = data_json['contrasenha']
+
+        profesor = get_object_or_404(Profesor, id=profesor_id)
+
+        cuenta = Cuenta.objects.create(persona_id=profesor.id, usuario=usuario, contrasenha=contrasenha, pregunta_id=2, respuesta="2000")
+        
+        return JsonResponse(cuenta.getJSONTodo(), safe=False)
+    
+    @require_http_methods(["POST"])
+    def editarPerfilProfesor(request):
+        
+        cuenta_id = request.POST.get('cuenta_id')
+        usuario = request.POST.get('usuario')
+        contrasenha = request.POST.get('contrasenha')
+        pregunta_id = request.POST.get('pregunta_id')
+        respuesta = request.POST.get('respuesta')
+
+        nombres = request.POST.get('nombres')
+        foto =  request.FILES['foto'] if 'foto' in request.FILES else None
+
+        cuenta = get_object_or_404(Cuenta,id=cuenta_id)
+        cuenta.usuario = usuario
+        cuenta.contrasenha = contrasenha
+        pregunta = get_object_or_404(PreguntaDeSeguridad,id=pregunta_id)
+        cuenta.pregunta = pregunta
+        cuenta.respuesta = respuesta
+        cuenta.save()
+
+        persona = cuenta.persona.getPersona()
+        persona.nombres = nombres
+        if foto:
+            persona.foto = foto
+        persona.save()
+        
+        return JsonResponse(cuenta.getJSONTodo(), safe=False)
 
 class GestionAsesorias:
     
@@ -236,7 +278,38 @@ class GestionAsesorias:
         else:
             return HttpResponseBadRequest("Reserva no encontrada")
 
-    #no c si deba deevolver algo pero xd no me mates
+    @require_http_methods(["POST"])
+    def abrir_extra(request):
+
+        data_json = json.loads(request.body.decode('utf-8'))
+        seccion_id = data_json['seccion_id']
+        fecha_inicio = data_json['fecha_inicio']
+        fecha_fin = data_json['fecha_fin']
+        enlace = data_json['enlace']
+        ambiente = data_json['ambiente']
+
+        asesoria = Asesoria.objects.create(seccion_id=seccion_id, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, enlace=enlace, ambiente=ambiente, extra=True)
+
+        return JsonResponse(asesoria.getJSONSimple(), safe=False)
+
+    @require_http_methods(["POST"])
+    def cerrar_extra(request):
+        data_json = json.loads(request.body.decode('utf-8'))
+        seccion_id = data_json['asesoria_id']
+        seccion = get_object_or_404(Seccion, id=seccion_id)
+        if(seccion.extra == True):
+            seccion.delete()
+        return JsonResponse({'message': 'Reserva eliminada exitosamente'})
+
+    @require_http_methods(["POST"])
+    def profesor_listar_asesorias(request):
+
+        r = DecoratorProfesorId(RequestExtractor(request))
+        [profesor_id] = r.extract()
+
+        profesor = get_object_or_404(Profesor, profesor_id)
+        
+        return JsonResponse(profesor.getReservaciones(), safe=False)
         
 class GestionAdministrador:
     @require_http_methods(["POST"])
@@ -372,6 +445,11 @@ class DecoratorPreguntaId(Decorator):
     def extract(self):
         self.lista.append('pregunta_id')
         return self.component.extract()
+class DecoratorSeccionId(Decorator):
+    def extract(self):
+        self.lista.append('seccion_id')
+        return self.component.extract()
+
 
 class GestionarStrings:
     @staticmethod

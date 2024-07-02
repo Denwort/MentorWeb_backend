@@ -123,6 +123,8 @@ class Profesor(Persona):
             "foto": self.foto,
             "secciones": [seccion.getJSONArriba() for seccion in self.secciones.all() if seccion.enPeriodoActual()]
         }
+    def getReservaciones(self):
+        return [seccion.getJSONReservas() for seccion in self.secciones.all() if seccion.enPeriodoActual()]
     
 class Carrera(models.Model):
     nombre = models.CharField(max_length=255)
@@ -194,7 +196,7 @@ class Seccion(models.Model, PeriodoInterface):
             "periodo": self.periodo.getJSONSimple(),
             "profesor": self.profesor.getJSONSimple(),
         }
-    def getJSONArriba(self):
+    def getJSONReservas(self):
         return {
             "id": self.id,
             "codigo": self.codigo,
@@ -220,15 +222,18 @@ class Asesoria(models.Model, PeriodoInterface, FechaInterface):
     fecha_fin = models.DateTimeField()
     enlace = models.TextField()
     ambiente = models.CharField(max_length=255)
+    extra = models.BooleanField(default=False)
     seccion = models.ForeignKey(Seccion, on_delete=models.CASCADE, blank=False, related_name='asesorias')
     estudiantes = models.ManyToManyField(Estudiante, through='Reserva')
+
     def getJSONSimple(self):
         return {
             "id": self.id,
             "fecha_inicio": self.fecha_inicio,
             "fecha_fin": self.fecha_fin,
             "enlace": self.enlace,
-            "ambiente": self.ambiente
+            "ambiente": self.ambiente,
+            "extra" : self.extra
         }
     def getJSONDerecha(self):
         return {
@@ -237,7 +242,18 @@ class Asesoria(models.Model, PeriodoInterface, FechaInterface):
             "fecha_fin": self.fecha_fin,
             "enlace": self.enlace,
             "ambiente": self.ambiente,
+            "extra" : self.extra,
             "seccion": self.seccion.getJSONDerecha(),
+        }
+    def getJSONReservas(self):
+        return {
+            "id": self.id,
+            "fecha_inicio": self.fecha_inicio,
+            "fecha_fin": self.fecha_fin,
+            "enlace": self.enlace,
+            "ambiente": self.ambiente,
+            "extra" : self.extra,
+            "reservas": [reserva.getJSONEstudiante() for reserva in self.reservas.all()]
         }
     def enPeriodoActual(self):
         return self.seccion.enPeriodoActual()
@@ -262,6 +278,12 @@ class Reserva(models.Model, PeriodoInterface, FechaInterface):
             "id": self.id,
             "codigo": self.codigo,
             "asesoria": self.asesoria.getJSONDerecha()
+        }
+    def getJSONEstudiante(self):
+        return {
+            "id": self.id,
+            "codigo": self.codigo,
+            "estudiante": self.asesoria.getJSONSimple()
         }
     def enPeriodoActual(self):
         return self.asesoria.enPeriodoActual()
@@ -325,6 +347,7 @@ class Ticket(models.Model):
     estado = models.CharField(max_length=255, default="Pendiente")
     estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE, blank=False, related_name='tickets')
     seccion = models.ForeignKey(Seccion, on_delete=models.CASCADE, blank=False, related_name='tickets')
+    
     def getJSONSimple(self):
         return {
             "id": self.id,

@@ -10,6 +10,8 @@ urlpatterns = [
     path('verPerfil/', views.GestionCuentas.verPerfil, name='verPerfil'),
     path('preguntasDeSeguridad/', views.GestionCuentas.preguntasDeSeguridad, name='preguntasDeSeguridad'),
     path('editarPerfilEstudiante/', views.GestionCuentas.editarPerfilEstudiante, name='editarPerfilEstudiante'),
+    path('crear_cuenta_profesor/', views.GestionCuentas.crear_cuenta_profesor, name='crear_cuenta_profesor'),
+    path('editarPerfilProfesor/', views.GestionCuentas.editarPerfilProfesor, name='editarPerfilProfesor'),
     
     path('asesorias_estudiante/', views.GestionAsesorias.asesorias_estudiante, name='asesorias_estudiante'),
     path('profesores/', views.GestionAsesorias.profesores, name='profesores'),
@@ -17,6 +19,9 @@ urlpatterns = [
     path('profesoresCursos/', views.GestionAsesorias.profesoresCursos, name='profesoresCursos'),
     path('reservar/', views.GestionAsesorias.reservar, name='reservar'),
     path('reservarEliminar/', views.GestionAsesorias.reservarEliminar, name='reservarEliminar'),
+    path('abrir_extra/', views.GestionAsesorias.abrir_extra, name='abrir_extra'),
+    path('cerrar_extra/', views.GestionAsesorias.cerrar_extra, name='cerrar_extra'),
+    path('profesor_listar_asesorias/', views.GestionAsesorias.profesor_listar_asesorias, name='profesor_listar_asesorias'),
 
     path('recientes/', views.GestionRepositorio.recientes, name='recientes'),
     path('cursos/', views.GestionRepositorio.cursos, name='cursos'),
