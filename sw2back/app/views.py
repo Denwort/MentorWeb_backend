@@ -263,15 +263,10 @@ class GestionAsesorias:
     @require_http_methods(["POST"])
     def reservarEliminar(request):
 
-        r = DecoratorEstudianteId(DecoratorAsesoriaId(RequestExtractor(request)))
-        [estudiante_id, asesoria_id] = r.extract()
+        r = DecoratorReservaId(RequestExtractor(request))
+        [reserva_id] = r.extract()
 
-        estudiante = Estudiante.objects.filter(id=estudiante_id).first()
-        asesoria = Asesoria.objects.filter(id=asesoria_id).first()
-        if estudiante is None or asesoria is None:
-            return HttpResponseBadRequest("Estudiante o asesoría no encontrada")
-
-        reserva = Reserva.objects.filter(estudiante=estudiante, asesoria=asesoria).first()
+        reserva = Reserva.objects.filter(id=reserva_id).first()
         if reserva:
             reserva.delete()
             return JsonResponse({'message': 'Reserva eliminada exitosamente'})
@@ -449,7 +444,10 @@ class DecoratorSeccionId(Decorator):
     def extract(self):
         self.lista.append('seccion_id')
         return self.component.extract()
-
+class DecoratorReservaId(Decorator):
+    def extract(self):
+        self.lista.append('reserva_id')
+        return self.component.extract()
 
 class GestionarStrings:
     @staticmethod
