@@ -202,7 +202,7 @@ class Seccion(models.Model, PeriodoInterface):
             "codigo": self.codigo,
             "curso": self.curso.getJSONDerecha(),
             "periodo": self.periodo.getJSONSimple(),
-            "asesorias": [asesoria.getJSONSimple() for asesoria in self.asesorias.all() if 
+            "asesorias": [asesoria.getJSONReservas() for asesoria in self.asesorias.all() if 
                 (asesoria.mayorAFechaActual())]
         }
     def enPeriodoActual(self):

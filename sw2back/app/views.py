@@ -290,19 +290,19 @@ class GestionAsesorias:
     @require_http_methods(["POST"])
     def cerrar_extra(request):
         data_json = json.loads(request.body.decode('utf-8'))
-        seccion_id = data_json['asesoria_id']
-        seccion = get_object_or_404(Seccion, id=seccion_id)
-        if(seccion.extra == True):
-            seccion.delete()
+        asesoria_id = data_json['asesoria_id']
+        asesoria = get_object_or_404(Asesoria, id=asesoria_id)
+        if(asesoria.extra == True):
+            asesoria.delete()
         return JsonResponse({'message': 'Reserva eliminada exitosamente'})
 
     @require_http_methods(["POST"])
     def profesor_listar_asesorias(request):
 
-        r = DecoratorProfesorId(RequestExtractor(request))
-        [profesor_id] = r.extract()
+        data_json = json.loads(request.body.decode('utf-8'))
+        profesor_id = data_json['profesor_id']
 
-        profesor = get_object_or_404(Profesor, profesor_id)
+        profesor = get_object_or_404(Profesor, id=profesor_id)
         
         return JsonResponse(profesor.getReservaciones(), safe=False)
         
