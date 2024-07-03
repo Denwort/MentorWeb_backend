@@ -283,7 +283,7 @@ class Reserva(models.Model, PeriodoInterface, FechaInterface):
         return {
             "id": self.id,
             "codigo": self.codigo,
-            "estudiante": self.asesoria.getJSONSimple()
+            "estudiante": self.estudiante.getJSONSimple()
         }
     def enPeriodoActual(self):
         return self.asesoria.enPeriodoActual()
