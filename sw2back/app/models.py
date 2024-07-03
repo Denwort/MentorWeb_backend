@@ -125,6 +125,8 @@ class Profesor(Persona):
         }
     def getReservaciones(self):
         return [seccion.getJSONReservas() for seccion in self.secciones.all() if seccion.enPeriodoActual()]
+    def getAsesoriasExtra(self):
+        return [seccion.getJSONExtras() for seccion in self.secciones.all() if seccion.enPeriodoActual()]
     
 class Carrera(models.Model):
     nombre = models.CharField(max_length=255)
@@ -213,6 +215,15 @@ class Seccion(models.Model, PeriodoInterface):
             "periodo": self.periodo.getJSONSimple(),
             "asesorias": [asesoria.getJSONReservas() for asesoria in self.asesorias.all() if 
                 (asesoria.mayorAFechaActual())]
+        }
+    def getJSONExtras(self):
+        return {
+            "id": self.id,
+            "codigo": self.codigo,
+            "curso": self.curso.getJSONDerecha(),
+            "periodo": self.periodo.getJSONSimple(),
+            "asesorias": [asesoria.getJSONSimple() for asesoria in self.asesorias.all() if 
+                (asesoria.mayorAFechaActual()) and asesoria.extra == True]
         }
     def enPeriodoActual(self):
         return self.periodo.enPeriodoActual()

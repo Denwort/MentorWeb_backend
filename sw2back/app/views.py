@@ -269,7 +269,7 @@ class GestionAsesorias:
         reserva = Reserva.objects.filter(id=reserva_id).first()
         if reserva:
             reserva.delete()
-            return JsonResponse({'message': 'Reserva eliminada exitosamente'})
+            return JsonResponse({'message': 'Reserva eliminada exitosamente'}, safe=False)
         else:
             return HttpResponseBadRequest("Reserva no encontrada")
 
@@ -288,13 +288,20 @@ class GestionAsesorias:
         return JsonResponse(asesoria.getJSONSimple(), safe=False)
 
     @require_http_methods(["POST"])
+    def listar_extras(request):
+        data_json = json.loads(request.body.decode('utf-8'))
+        profesor_id = data_json['profesor_id']
+        profesor = get_object_or_404(Profesor, id=profesor_id)
+        return JsonResponse(profesor.getAsesoriasExtra(), safe=False)
+
+    @require_http_methods(["POST"])
     def cerrar_extra(request):
         data_json = json.loads(request.body.decode('utf-8'))
         asesoria_id = data_json['asesoria_id']
         asesoria = get_object_or_404(Asesoria, id=asesoria_id)
         if(asesoria.extra == True):
             asesoria.delete()
-        return JsonResponse({'message': 'Reserva eliminada exitosamente'})
+        return JsonResponse({'message': 'Reserva eliminada exitosamente'}, safe=False)
 
     @require_http_methods(["POST"])
     def profesor_listar_asesorias(request):
