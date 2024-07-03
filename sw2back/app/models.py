@@ -196,6 +196,15 @@ class Seccion(models.Model, PeriodoInterface):
             "periodo": self.periodo.getJSONSimple(),
             "profesor": self.profesor.getJSONSimple(),
         }
+    def getJSONArriba(self):
+        return {
+            "id": self.id,
+            "codigo": self.codigo,
+            "curso": self.curso.getJSONDerecha(),
+            "periodo": self.periodo.getJSONSimple(),
+            "asesorias": [asesoria.getJSONSimple() for asesoria in self.asesorias.all() if 
+                (asesoria.mayorAFechaActual())]
+        }
     def getJSONReservas(self):
         return {
             "id": self.id,
