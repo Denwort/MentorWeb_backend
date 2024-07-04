@@ -10,6 +10,9 @@ from datetime import datetime
 import json
 import pandas as pd
 from django.shortcuts import get_object_or_404
+from django.conf import settings
+from django.core.mail import send_mail
+import random
 
 class GestionCuentas:
 
@@ -138,15 +141,20 @@ class GestionCuentas:
     def crear_cuenta_profesor(request):
 
         data_json = json.loads(request.body.decode('utf-8'))
-        profesor_id = data_json['profesor_id']
-        usuario = data_json['usuario']
-        contrasenha = data_json['contrasenha']
+        correo = data_json['correo']
 
-        profesor = get_object_or_404(Profesor, id=profesor_id)
+        profesor = get_object_or_404(Profesor, correo=correo)
+        nueva_contrasenha = ''.join(random.choice('0123456789') for _ in range(8))
 
-        cuenta = Cuenta.objects.create(persona_id=profesor.id, usuario=usuario, contrasenha=contrasenha, pregunta_id=2, respuesta="2000")
-        
-        return JsonResponse(cuenta.getJSONTodo(), safe=False)
+        cuenta = Cuenta.objects.create(persona_id=profesor.id, usuario=profesor.correo, contrasenha=nueva_contrasenha, pregunta_id=2, respuesta="2000")
+
+        subject = 'Bienvenido a MentorWeb!'
+        message = f'Hola {profesor.nombres}, gracias por registrarte en MentorWeb.\nAqui estan tus credenciales para la plataforma\nUsuario: {profesor.correo}\nContraseña: {nueva_contrasenha}\nDentro de la plataforma, en el apartado de perfil, podrás personalizar tus datos. Se le recomienda cambiar su contraseña inicial por una más segura.'
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [profesor.correo, ]
+        send_mail( subject, message, email_from, recipient_list )
+
+        return JsonResponse({"mensaje": "Las credenciales han sido enviadas a su correo"}, safe=False)
     
     @require_http_methods(["POST"])
     def editarPerfilProfesor(request):

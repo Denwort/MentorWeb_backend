@@ -109,6 +109,7 @@ class Administrador(Persona):
         
 class Profesor(Persona):
     foto = models.TextField()
+    correo = models.CharField(max_length=255, default='')
     def getJSONSimple(self):
         return {
             "id": self.id,
