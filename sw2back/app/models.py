@@ -25,6 +25,8 @@ class Persona(models.Model):
             return 'Estudiante'
         elif hasattr(self, 'administrador'):
             return 'Administrador'
+        elif hasattr(self, 'profesor'):
+            return 'Profesor'
         else:
             return 'Persona'
     def getPersona(self):
@@ -32,6 +34,8 @@ class Persona(models.Model):
             return Estudiante.objects.get(pk=self.pk)
         if hasattr(self, 'administrador'):
             return Administrador.objects.get(pk=self.pk)
+        if hasattr(self, 'profesor'):
+            return Profesor.objects.get(pk=self.pk)
     @abstractmethod
     def getJSONSimple(self):
         pass

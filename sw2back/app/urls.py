@@ -21,6 +21,7 @@ urlpatterns = [
     path('reservarEliminar/', views.GestionAsesorias.reservarEliminar, name='reservarEliminar'),
     path('abrir_extra/', views.GestionAsesorias.abrir_extra, name='abrir_extra'),
     path('cerrar_extra/', views.GestionAsesorias.cerrar_extra, name='cerrar_extra'),
+    path('listar_extras/', views.GestionAsesorias.listar_extras, name='listar_extras'),
     path('profesor_listar_asesorias/', views.GestionAsesorias.profesor_listar_asesorias, name='profesor_listar_asesorias'),
 
     path('recientes/', views.GestionRepositorio.recientes, name='recientes'),
