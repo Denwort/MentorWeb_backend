@@ -83,7 +83,7 @@ class Cuenta(models.Model):
             "contrasenha": self.contrasenha,
             "pregunta": self.pregunta.getJSONSimple(),
             "respuesta": self.respuesta,
-            "persona": self.persona.getPersona().getJSONSimple()
+            "persona": self.persona.getPersona().getJSONSimple(),
         }
 
 class Estudiante(Persona):
@@ -120,6 +120,7 @@ class Profesor(Persona):
             "tipo": self.tipo,
             "nombres": self.nombres,
             "foto": self.foto,
+            "correo":self.correo,
         }
     def getAsesorias(self):
         return {
