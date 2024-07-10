@@ -146,6 +146,10 @@ class GestionCuentas:
         profesor = get_object_or_404(Profesor, correo=correo)
         nueva_contrasenha = ''.join(random.choice('0123456789') for _ in range(8))
 
+        cuenta = Cuenta.objects.filter(persona=profesor).exists()
+        if cuenta:
+            return HttpResponseBadRequest('profesor ya registrado')
+
         cuenta = Cuenta.objects.create(persona_id=profesor.id, usuario=profesor.correo, contrasenha=nueva_contrasenha, pregunta_id=2, respuesta="2000")
 
         subject = 'Bienvenido a MentorWeb!'
