@@ -88,7 +88,7 @@ class Cuenta(models.Model):
 
 class Estudiante(Persona):
     correo = models.CharField(max_length=255, unique=False)
-    foto = models.FileField(upload_to="imagenes/", default="imagenes/foto_default.png")
+    foto = models.FileField(upload_to=lambda instance, filename: f"imagenes/{uuid.uuid4().hex}.{filename.split('.')[-1]}", default="imagenes/foto_default.png")
     def getJSONSimple(self):
         return {
             "id": self.id,
@@ -112,21 +112,20 @@ class Administrador(Persona):
         }
         
 class Profesor(Persona):
-    foto = models.TextField()
+    foto = models.FileField(upload_to=lambda instance, filename: f"imagenes/{uuid.uuid4().hex}.{filename.split('.')[-1]}", default="imagenes/foto_default.png")
     correo = models.CharField(max_length=255, default='')
     def getJSONSimple(self):
         return {
             "id": self.id,
             "tipo": self.tipo,
             "nombres": self.nombres,
-            "foto": self.foto,
+            "foto": self.foto.name if self.foto.name.startswith("https://encrypted-tbn0.gstatic.com") else "http://127.0.0.1:8000"+self.foto.url,
             "correo":self.correo,
         }
     def getAsesorias(self):
         return {
             "id": self.id,
             "nombres": self.nombres,
-            "foto": self.foto,
             "secciones": [seccion.getJSONArriba() for seccion in self.secciones.all() if seccion.enPeriodoActual()]
         }
     def getReservaciones(self):
@@ -363,8 +362,8 @@ class Documento(models.Model):
 
 class Ticket(models.Model):
     def generar_nombre_unico(instance, filename):
-        ext = filename.split('.')[-1]  # Obtener la extensión del archivo
-        nombre_archivo = f"{uuid.uuid4().hex}.{ext}"  # Generar un nombre único usando UUID
+        ext = filename.split('.')[-1] 
+        nombre_archivo = f"{uuid.uuid4().hex}.{ext}"
         return f"archivos/{nombre_archivo}"
     asunto = models.CharField(max_length=255)
     descripcion = models.TextField()
