@@ -122,6 +122,13 @@ class Profesor(Persona):
             "foto": self.foto.name if self.foto.name.startswith("https://encrypted-tbn0.gstatic.com") else "http://127.0.0.1:8000"+self.foto.url,
             "correo":self.correo,
         }
+        
+    def getJSONBasico(self):
+        return {
+            "id": self.id,
+            "nombres": self.nombres,
+        }
+        
     def getAsesorias(self):
         return {
             "id": self.id,
@@ -195,14 +202,16 @@ class Seccion(models.Model, PeriodoInterface):
             "codigo": self.codigo,
             "profesor": self.profesor.getJSONSimple()
         }
+        
     def getJSONDerecha(self):
         return {
             "id": self.id,
             "codigo": self.codigo,
             "curso": self.curso.getJSONDerecha(),
             "periodo": self.periodo.getJSONSimple(),
-            "profesor": self.profesor.getJSONSimple(),
+            "profesor": self.profesor.getJSONBasico(),
         }
+        
     def getJSONArriba(self):
         return {
             "id": self.id,

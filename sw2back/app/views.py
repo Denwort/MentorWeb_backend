@@ -214,6 +214,28 @@ class GestionAsesorias:
         return JsonResponse([profesor.getJSONSimple() for profesor in profesores], safe=False)
 
     @require_http_methods(["POST"])
+    def profesoresCliff(request):
+        data_json = json.loads(request.body.decode('utf-8'))
+        keywords_profesores = data_json['profesor']
+        keywords_cursos = data_json['cursos']
+        
+        secciones_disponibles = Seccion.objects.all()
+
+        secciones_filtradas = []
+
+        for seccion in secciones_disponibles:
+            profesor = seccion.profesor
+            if any(keyword.lower() in profesor.nombres.lower() for keyword in keywords_profesores):
+                curso = seccion.curso
+                if any(keyword.lower() in curso.nombre.lower() for keyword in keywords_cursos):
+                    secciones_filtradas.append(seccion.getJSONDerecha())
+        
+        if not secciones_filtradas:
+            return JsonResponse({"error": "No se encontraron secciones para los keywords proporcionados"}, status=404)
+
+        return JsonResponse(secciones_filtradas, safe=False)
+
+    @require_http_methods(["POST"])
     def profesor(request):
 
         r = DecoratorProfesorId(RequestExtractor(request))
@@ -418,6 +440,7 @@ class DecoratorNuevaContrasenia(Decorator):
     def extract(self):
         self.lista.append('nuevaContrasenia')
         return self.component.extract()
+    
 # Para el repositorio
 class DecoratorCursoId(Decorator):
     def extract(self):
