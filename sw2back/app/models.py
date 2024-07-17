@@ -126,6 +126,7 @@ class Profesor(Persona):
     def getJSONBasico(self):
         return {
             "id": self.id,
+            "foto": self.foto.name if self.foto.name.startswith("https://encrypted-tbn0.gstatic.com") else "http://127.0.0.1:8000"+self.foto.url,
             "nombres": self.nombres,
         }
         
@@ -133,13 +134,15 @@ class Profesor(Persona):
         return {
             "id": self.id,
             "nombres": self.nombres,
-            "secciones": [seccion.getJSONArriba() for seccion in self.secciones.all() if seccion.enPeriodoActual()]
+            "secciones": [seccion.getJSONArriba() for seccion in self.secciones.all() if seccion.enPeriodoActual()],
+            "foto": self.foto.name if self.foto.name.startswith("https://encrypted-tbn0.gstatic.com") else "http://127.0.0.1:8000"+self.foto.url
         }
         
     def getAsesoriasConReserva(self,estudiante_id):
         return {
             "id": self.id,
             "nombres": self.nombres,
+            "foto": self.foto.name if self.foto.name.startswith("https://encrypted-tbn0.gstatic.com") else "http://127.0.0.1:8000"+self.foto.url,
             "secciones": [seccion.getJSONArribaConReserva(estudiante_id) for seccion in self.secciones.all() if seccion.enPeriodoActual()]
         }
         
