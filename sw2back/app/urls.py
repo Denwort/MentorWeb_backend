@@ -19,6 +19,9 @@ urlpatterns = [
     path('profesoresCliff/', views.GestionAsesorias.profesoresCliff, name='profesoresCliff'),
     
     path('profesor/', views.GestionAsesorias.profesor, name='profesor'),
+    
+    path('profesorAsesoriasxd/', views.GestionAsesorias.profesorAsesoriasxd, name='profesorAsesoriasxd'),
+    
     path('profesoresCursos/', views.GestionAsesorias.profesoresCursos, name='profesoresCursos'),
     path('reservar/', views.GestionAsesorias.reservar, name='reservar'),
     path('reservarEliminar/', views.GestionAsesorias.reservarEliminar, name='reservarEliminar'),

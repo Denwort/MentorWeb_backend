@@ -237,7 +237,6 @@ class GestionAsesorias:
 
     @require_http_methods(["POST"])
     def profesor(request):
-
         r = DecoratorProfesorId(RequestExtractor(request))
         [profesor_id] = r.extract()
 
@@ -247,6 +246,27 @@ class GestionAsesorias:
             return HttpResponseBadRequest("profesor inexistente")
         
         return JsonResponse(profesor.getAsesorias(), safe=False)
+    
+    @require_http_methods(["POST"])
+    def profesorAsesoriasxd(request):
+        r = DecoratorEstudianteId(DecoratorProfesorId(RequestExtractor(request)))
+        [estudiante_id,profesor_id] = r.extract()
+
+        profesor = Profesor.objects.filter(id=profesor_id).first()
+        reservas = Reserva.objects.filter(estudiante_id=estudiante_id)
+
+        if not profesor:
+            return HttpResponseBadRequest("profesor inexistente")
+        
+        
+        
+        return JsonResponse(profesor.getAsesoriasConReserva(estudiante_id), safe=False)
+    
+    
+    #obtengo profesor y usuario id
+    #buscar si ya esta reservado con el usuario id
+    #si el usuario ya reservo devuevlo un listado de que ya esta reservado
+    #en caso contrario se manda la lista
     
     @require_http_methods(["POST"])
     def profesoresCursos(request):
@@ -490,10 +510,7 @@ class DecoratorReservaId(Decorator):
     def extract(self):
         self.lista.append('reserva_id')
         return self.component.extract()
-class DecoratorUsuarioId(Decorator):
-    def extract(self):
-        self.lista.append('usuario_id')
-        return self.component.extract()
+
 
 class GestionarStrings:
     @staticmethod

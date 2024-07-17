@@ -135,6 +135,14 @@ class Profesor(Persona):
             "nombres": self.nombres,
             "secciones": [seccion.getJSONArriba() for seccion in self.secciones.all() if seccion.enPeriodoActual()]
         }
+        
+    def getAsesoriasConReserva(self,estudiante_id):
+        return {
+            "id": self.id,
+            "nombres": self.nombres,
+            "secciones": [seccion.getJSONArribaConReserva(estudiante_id) for seccion in self.secciones.all() if seccion.enPeriodoActual()]
+        }
+        
     def getReservaciones(self):
         return [seccion.getJSONReservas() for seccion in self.secciones.all() if seccion.enPeriodoActual()]
     def getAsesoriasExtra(self):
@@ -221,6 +229,16 @@ class Seccion(models.Model, PeriodoInterface):
             "asesorias": [asesoria.getJSONSimple() for asesoria in self.asesorias.all() if 
                 (asesoria.mayorAFechaActual())]
         }
+        
+    def getJSONArribaConReserva(self,estudiante_id):
+        return {
+            "id": self.id,
+            "codigo": self.codigo,
+            "curso": self.curso.getJSONDerecha(),
+            "periodo": self.periodo.getJSONSimple(),
+            "asesorias": [asesoria.getJSONConReservas(estudiante_id) for asesoria in self.asesorias.all() if 
+                (asesoria.mayorAFechaActual())]
+        }
     def getJSONReservas(self):
         return {
             "id": self.id,
@@ -268,6 +286,17 @@ class Asesoria(models.Model, PeriodoInterface, FechaInterface):
             "enlace": self.enlace,
             "ambiente": self.ambiente,
             "extra" : self.extra
+        }
+        
+    def getJSONConReservas(self,estudiante_id):
+        return {
+            "id": self.id,
+            "fecha_inicio": self.fecha_inicio,
+            "fecha_fin": self.fecha_fin,
+            "enlace": self.enlace,
+            "ambiente": self.ambiente,
+            "extra" : self.extra,
+            "reservas": [reserva.getJSONEstudiante() for reserva in self.reservas.all() if reserva.estudiante.id==estudiante_id]
         }
     def getJSONDerecha(self):
         return {
