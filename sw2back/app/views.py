@@ -490,6 +490,10 @@ class DecoratorReservaId(Decorator):
     def extract(self):
         self.lista.append('reserva_id')
         return self.component.extract()
+class DecoratorUsuarioId(Decorator):
+    def extract(self):
+        self.lista.append('usuario_id')
+        return self.component.extract()
 
 class GestionarStrings:
     @staticmethod
