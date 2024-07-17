@@ -331,11 +331,23 @@ class GestionAsesorias:
     def abrir_extra(request):
 
         data_json = json.loads(request.body.decode('utf-8'))
+        profesor_id = data_json['profesor_id']
         seccion_id = data_json['seccion_id']
-        fecha_inicio = data_json['fecha_inicio']
-        fecha_fin = data_json['fecha_fin']
+        fecha_inicio = datetime.fromisoformat(data_json['fecha_inicio'])
+        fecha_fin = datetime.fromisoformat(data_json['fecha_fin'])
         enlace = data_json['enlace']
         ambiente = data_json['ambiente']
+
+        profesor = get_object_or_404(Profesor, id=profesor_id)
+        secciones = profesor.secciones.all()
+        for seccion in secciones:
+            asesorias_existentes = seccion.asesorias.filter(
+                (models.Q(fecha_inicio__lte=fecha_inicio) & models.Q(fecha_fin__gte=fecha_inicio)) |
+                (models.Q(fecha_inicio__lte=fecha_fin) & models.Q(fecha_fin__gte=fecha_fin)) |
+                (models.Q(fecha_inicio__gte=fecha_inicio) & models.Q(fecha_fin__lte=fecha_fin))
+            )
+            if asesorias_existentes.exists():
+                return HttpResponseBadRequest('El horario de la nueva asesoría extra se cruza con una asesoría de '+seccion.curso.nombre)
 
         asesoria = Asesoria.objects.create(seccion_id=seccion_id, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, enlace=enlace, ambiente=ambiente, extra=True)
 
